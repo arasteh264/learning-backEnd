@@ -5,13 +5,29 @@ const jwt = require("jsonwebtoken");
 const { isValidObjectId } = require("mongoose");
 
 exports.banUser = async (req, res) => {
-  const mainUser = await userModel.findOne({ _id: req.params.id }).lean();
-  const banUserRes = await banUserModel.create({ phone: mainUser.phone });
-  if (banUserModel) {
-    return res.status(200).json({ message: "کاربر با موفقیت بن شد." });
+   const user = await userModel.findById(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({ message: "کاربر پیدا نشد" });
   }
 
-  return res.status(500).json({ message: "خطا ,با پشتیبانی تماس بگیرید." });
+  const existingBan = await banUserModel.findOne({ phone: user.phone });
+
+  if (existingBan) {
+    await banUserModel.deleteOne({ _id: existingBan._id });
+
+    return res.status(200).json({
+      message: "کاربر از حالت بن خارج شد",
+      banStatus: false,
+    });
+  }
+
+  await banUserModel.create({ phone: user.phone });
+
+  return res.status(200).json({
+    message: "کاربر با موفقیت بن شد",
+    banStatus: true,
+  });
 };
 exports.getAll = async (req, res) => {
   const users = await userModel.find({}, { password: 0 });
@@ -29,7 +45,7 @@ exports.removeUser = async (req, res) => {
   });
 };
 exports.changeRole = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
   const isValidUserId = isValidObjectId(id);
   if (!isValidUserId) {
     return res.status(409).json({
@@ -39,12 +55,7 @@ exports.changeRole = async (req, res) => {
   const user = await userModel.findOne({ _id: id });
   let newRole = user.role === "ADMIN" ? "USER" : "ADMIN";
 
-  const updateUser = await userModel.findByIdAndUpdate(
-    { _id: id },
-    {
-      role: newRole,
-    },
-  );
+  const updateUser = await userModel.findByIdAndUpdate(id, { role: newRole });
   if (updateUser) {
     return res.json({
       message: "نقش کاربر با موفقیت تغییر کرد.",
@@ -61,8 +72,6 @@ exports.updateUser = async (req, res) => {
       email,
       phone,
     };
-
-    // فقط وقتی پسورد داده شده هش کن
     if (password) {
       updateFields.password = await bcrypt.hash(password, 12);
     }
@@ -101,7 +110,7 @@ exports.getProfile = async (req, res) => {
       username: req.user.userName,
       email: req.user.email,
       createdAt: req.user.createdAt,
-      phon: req.user.phone,
+      phone: req.user.phone,
       role: req.user.role,
       name: req.user.name,
     };

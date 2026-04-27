@@ -29,6 +29,11 @@ const schema = new mongoose.Schema(
       enum: ["ADMIN", "USER"],
       default: "USER",
     },
+    banStatus: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   { timestamps: true }
 );
