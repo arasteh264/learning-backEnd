@@ -38,13 +38,13 @@ const countOfUser=await userModel.countDocuments()
 const hashedPassword=await bcrypt.hash(password,10)
 
 
-const isUserBan = await banUserModel.findOne({ phone: user.phone });
+// const isUserBan = await banUserModel.findOne({ phone: user.phone });
 
-if (isUserBan) {
-  return res.status(403).json({
-    message: "حساب کاربری شما مسدود شده است."
-  });
-}
+// if (isUserBan) {
+//   return res.status(403).json({
+//     message: "حساب کاربری شما مسدود شده است."
+//   });
+// }
 const user= await userModel.create({
     email,
     userName,
