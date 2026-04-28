@@ -4,11 +4,20 @@ const registerValidator=require("./../../validators/register")
 const jwt=require("jsonwebtoken")
 const banUserModel=require("./../../models/ban-phone")
 exports.register=async (req,res)=>{ 
+    
+
 const validationRes=registerValidator(req.body)
 if(validationRes!==true){
     return res.status(422).json(validationRes)
 }
 const {userName,name,email,password,phone}=req.body;
+const isUserBan = await banUserModel.findOne({ phone });
+
+if (isUserBan) {
+  return res.status(403).json({
+    message: "حساب کاربری شما مسدود شده است."
+  });
+}
 const isUserNameExists=await userModel.findOne({
     $or :[{userName}]
 })
@@ -38,13 +47,8 @@ const countOfUser=await userModel.countDocuments()
 const hashedPassword=await bcrypt.hash(password,10)
 
 
-// const isUserBan = await banUserModel.findOne({ phone: user.phone });
 
-// if (isUserBan) {
-//   return res.status(403).json({
-//     message: "حساب کاربری شما مسدود شده است."
-//   });
-// }
+
 const user= await userModel.create({
     email,
     userName,
