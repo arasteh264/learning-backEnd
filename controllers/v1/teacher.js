@@ -47,3 +47,70 @@ exports.getAllTeacher = async (req, res) => {
       const teachers = await teacherModel.find({}, { password: 0 }).populate("userId", "name email");
   return res.json(teachers);
 }
+
+exports.requestForTeacher=async(req,res)=>{
+  
+  try {
+    const userId = req.user._id; 
+    const { bio, expertise } = req.body;
+
+    // چک کن قبلاً درخواست نداده باشه
+    const existing = await teacherModel.findOne({ userId });
+    if (existing) {
+      return res.status(400).json({
+        message: "شما قبلاً درخواست ثبت کرده‌اید",
+      });
+    }
+
+const teacher = await teacherModel.create({
+  userId,
+  bio,
+  expertise: Array.isArray(expertise)
+    ? expertise
+    : expertise.split(","),
+});
+
+    res.status(201).json({
+      message: "درخواست شما ثبت شد و در انتظار تایید است",
+      data: teacher,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "خطا در ثبت درخواست",
+    });
+  }
+
+}
+
+exports.verifyTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const teacher = await teacherModel.findByIdAndUpdate(
+      id,
+      { isVerified: true },
+      { new: true }
+    );
+
+    if (!teacher) {
+      return res.status(404).json({ message: "پیدا نشد" });
+    }
+
+    res.json({
+      message: "استاد تایید شد",
+      data: teacher,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "خطا در تایید" });
+  }
+};
+
+exports.getExpertiseList = (req, res) => {
+  res.json([
+    "react",
+    "nodejs",
+    "mongodb",
+    "typescript",
+    "nextjs",
+  ]);
+};
