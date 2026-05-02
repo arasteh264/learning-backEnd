@@ -8,4 +8,6 @@ router.route("/").get(authMiddleware,isAdminMiddleware,teacherController.getAllT
 router.route("/request").post(authMiddleware,teacherController.requestForTeacher)
 router.route("/verify/:id").post(authMiddleware,isAdminMiddleware,teacherController.verifyTeacher)
 router.route("/expertises").get( authMiddleware,teacherController.getExpertiseList);
+router.route("/:id").delete( authMiddleware,isAdminMiddleware,teacherController.removeTeacher);
+router.route("/verifyed").get( authMiddleware,isAdminMiddleware,teacherController.getVerifyTeachers);
 module.exports=router;
