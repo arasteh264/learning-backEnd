@@ -40,8 +40,23 @@ console.log(req.body);
 };
 
 exports.getAllCourse = async (req, res) => {
-  const courses = await courseModel.find({});
-  return res.status(200).json(courses);
+  try {
+    const courses = await courseModel
+      .find({})
+      .select("name price discount status cover creator category createdAt")
+      .populate("creator", "name")     
+      .populate("category", "title");
+
+    const formattedCourses = courses.map(course => ({
+      ...course.toObject(),
+      creator: course.creator?.name,
+      category: course.category?.title
+    }));
+
+    res.status(200).json(formattedCourses);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
 };
 exports.createSession = async (req, res) => {
   try {
