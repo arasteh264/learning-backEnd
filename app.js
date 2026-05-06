@@ -28,5 +28,5 @@ app.use("/v1/category", categoryRouter);
 app.use("/v1/course", courseRouter);
 app.use("/v1/comment", commentRouter);
 app.use("/v1/teacher", teacherRouter);
-app.use('/covers', express.static('public/covers'));
+app.use("/course/covers", express.static("public/course/covers"));
 module.exports = app;

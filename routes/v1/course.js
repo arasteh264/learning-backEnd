@@ -40,9 +40,20 @@ router
     authMiddleware,
     isAdminMiddleware,
     multer({ storage: multerStorage, limits: { fileSize: 1000000 } }).single(
-      "cover",
+      "cover"
     ),
     courseController.createCourse,
+  );
+
+  router
+  .route("/:id")
+  .get(authMiddleware, isAdminMiddleware, courseController.getCourseDetail)
+  .delete(authMiddleware, isAdminMiddleware,courseController.removeCourse)
+  .patch(
+    authMiddleware,
+    isAdminMiddleware,
+    multer({ storage: multerStorage, limits: { fileSize: 1000000 } }).single("cover"),
+    courseController.updateCourse
   );
 
 module.exports = router;
