@@ -1,30 +1,56 @@
 const mongoose = require("mongoose");
+
 const schema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
     },
+
     time: {
       type: String,
       required: true,
     },
-      free: {
-      type: Number,//0=true 1=false
+
+    free: {
+      type: Number, // 0=true 1=false
       required: true,
     },
-      video: {
+
+    video: {
       type: String,
       required: true,
     },
-      course: {
+
+    course: {
       type: mongoose.Types.ObjectId,
-      ref:"Course",
+      ref: "Course",
       required: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  }
 );
 
 const model = mongoose.model("Session", schema);
+
 module.exports = model;
