@@ -6,7 +6,7 @@ const teacherSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true, 
+      unique: true,
     },
 
     bio: {
@@ -36,9 +36,28 @@ const teacherSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  }
 );
 
 const Teacher = mongoose.model("Teacher", teacherSchema);

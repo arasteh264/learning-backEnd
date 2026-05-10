@@ -29,4 +29,5 @@ app.use("/v1/course", courseRouter);
 app.use("/v1/comment", commentRouter);
 app.use("/v1/teacher", teacherRouter);
 app.use("/course/covers", express.static("public/course/covers"));
+app.use("/session/videos", express.static("public/session/videos"));
 module.exports = app;

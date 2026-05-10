@@ -1,17 +1,27 @@
-const path=require("path");
-const multer=require("multer");
-const crypto=require("crypto")
-module.exports=multer.diskStorage({
-    destination:(req,file,cb)=>{
-cb(null,path.join(__dirname,"..","public","course","covers"))
+const path = require("path");
+const multer = require("multer");
+const crypto = require("crypto");
+
+const uploader = (folder) => {
+  return multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, "..", "public", folder));
+      },
+
+      filename: (req, file, cb) => {
+        const filename = crypto.randomBytes(16).toString("hex");
+
+        const ext = path.extname(file.originalname);
+
+        cb(null, filename + ext);
+      },
+    }),
+
+    limits: {
+      fileSize: 100000000,
     },
-    filename:(req,file,cb)=>{
+  });
+};
 
-const filename = crypto.randomBytes(16).toString("hex");
-console.log("fileName",filename);
-
-// const filename=crypto.createHash("SHA2").update(file.originalname).digest("hex")
-const ext = path.extname(file.originalname)
-cb(null, filename + ext)
-    }
-})
+module.exports = uploader;
