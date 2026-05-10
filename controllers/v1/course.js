@@ -141,6 +141,7 @@ exports.getCourseDetail = async (req, res) => {
         message: "دوره یافت نشد",
       });
     }
+console.log(course);
 
     const sessionCount = await sessionModel.countDocuments({
       course: course._id,
@@ -148,8 +149,8 @@ exports.getCourseDetail = async (req, res) => {
 
     const result = {
       ...course.toObject(),
-      creator: course.creator?.name,
-      category: course.category?.title,
+      creatorId: course.creator?._id,
+      categoryId: course.category?._id,
       cover: `${req.protocol}://${req.get("host")}/course/covers/${course.cover}`,
       sessionCount,
     };
