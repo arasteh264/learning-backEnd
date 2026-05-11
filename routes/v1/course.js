@@ -28,6 +28,7 @@ router
   .route("/session/:id")
   .get(authMiddleware, isAdminMiddleware, courseController.getSessionDetail)
   .delete(authMiddleware,isAdminMiddleware,courseController.removeSession)
+  .put(authMiddleware,isAdminMiddleware, uploader("session/videos").single("video"),courseController.updateSession)
 
 //برای ایجاد دوره
 router.route("/").post(
