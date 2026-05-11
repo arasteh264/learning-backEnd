@@ -266,40 +266,89 @@ exports.removeSession = async (req, res) => {
   }
 };
 
-
-
-exports.getSessionDetail=async (req,res)=>{
+exports.getSessionDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const course = await sessionModel
+    const session = await sessionModel
       .findById(id)
-      .populate("creator", "name")
-      .populate("category", "title")
-      .lean(); 
+      .populate("course", "name")
+      .lean();
 
-    if (!course) {
-      return res.status(404).json({ message: "جلسه یافت نشد" });
+    if (!session) {
+      return res.status(404).json({
+        message: "جلسه یافت نشد",
+      });
     }
 
-    const sessionCount = await sessionModel.countDocuments({
-      course: course._id,
-    });
-
     const result = {
-      ...course,
-      id: course._id,
-      creatorId: course.creator?._id,
-      categoryId: course.category?._id,
-      cover: `${req.protocol}://${req.get("host")}/course/covers/${course.cover}`,
-      sessionCount,
+      ...serialize(session),
+      course: session.course._id,
+      video: `${req.protocol}://${req.get("host")}/session/videos/${session.video}`,
     };
 
-    delete result._id;
-
     return res.status(200).json(result);
+
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server Error" });
+
+    return res.status(500).json({
+      message: "خطای سرور",
+    });
   }
-}
+};
+
+exports.updateSession = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      title,
+      time,
+      free,
+      course,
+    } = req.body;
+
+    const session = await sessionModel.findById(id);
+
+    if (!session) {
+      return res.status(404).json({
+        message: "جلسه یافت نشد",
+      });
+    }
+
+    const updateData = {
+      title,
+      time,
+      free,
+      course,
+    };
+
+    if (req.file) {
+      updateData.video = req.file.filename;
+    }
+
+    const updatedSession =
+      await sessionModel.findByIdAndUpdate(
+        id,
+        updateData,
+        {
+          new: true,
+        }
+      );
+
+    return res.status(200).json({
+      message:
+        "جلسه با موفقیت ویرایش شد",
+      session: updatedSession,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message:
+        "خطا در ویرایش جلسه",
+    });
+  }
+};
