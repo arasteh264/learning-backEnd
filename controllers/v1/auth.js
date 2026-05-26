@@ -76,6 +76,7 @@ if(!user){
         message:"کاربری با این مشخصات یافت نشد."
     })
 }
+
 const isPasswordValid=await bcrypt.compare(password,user.password);
 
 if(!isPasswordValid){
@@ -88,7 +89,14 @@ const accessToken=jwt.sign({id:user._id},process.env.JWT_SECRET,{
     expiresIn:"30 day"
 });
 
-return res.status(200).json({accessToken})
+return res.status(200).json({
+  accessToken,
+  user: {
+    id: user._id,
+    userName: user.userName,
+    role: user.role,
+  },
+});
 
 }
 exports.getMe=async (req,res)=>{
