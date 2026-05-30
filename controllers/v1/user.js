@@ -1,65 +1,138 @@
-const userModel = require("./../../models/user");
-const banUserModel = require("./../../models/ban-phone");
+const supabase = require("../../config/supabase");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { isValidObjectId } = require("mongoose");
 
 exports.banUser = async (req, res) => {
-   const user = await userModel.findById(req.params.id);
+  try {
+    const userId = req.params.id;
 
-  if (!user) {
-    return res.status(404).json({ message: "کاربر پیدا نشد" });
-  }
+    const { data: user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-  const existingBan = await banUserModel.findOne({ phone: user.phone });
+    if (!user) {
+      return res.status(404).json({ message: "کاربر پیدا نشد" });
+    }
 
-  if (existingBan) {
-    await banUserModel.deleteOne({ _id: existingBan._id });
+    const { data: existingBan } = await supabase
+      .from("banned_users")
+      .select("*")
+      .eq("phone", user.phone)
+      .maybeSingle();
+
+    // UNBAN
+    if (existingBan) {
+      await supabase
+        .from("banned_users")
+        .delete()
+        .eq("phone", user.phone);
+
+      return res.status(200).json({
+        message: "کاربر از حالت بن خارج شد",
+        banStatus: false,
+      });
+    }
+
+    // BAN
+    await supabase.from("banned_users").insert([
+      {
+        phone: user.phone,
+      },
+    ]);
 
     return res.status(200).json({
-      message: "کاربر از حالت بن خارج شد",
-      banStatus: false,
+      message: "کاربر با موفقیت بن شد",
+      banStatus: true,
     });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
-
-  await banUserModel.create({ phone: user.phone });
-
-  return res.status(200).json({
-    message: "کاربر با موفقیت بن شد",
-    banStatus: true,
-  });
 };
+
+
 exports.getAll = async (req, res) => {
-  const users = await userModel.find({}, { password: 0 });
-  return res.json(users);
-};
-exports.removeUser = async (req, res) => {
-  const userRemove = await userModel.findByIdAndDelete(req.params.id);
-  if (userRemove) {
-    return res.status(200).json({
-      message: "کاربر با موفقیت حذف شد.",
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*");
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    // hide password
+    const users = data.map((u) => {
+      delete u.password;
+      return u;
     });
+
+    return res.json(users);
+  } catch (err) {
+    return res.status(500).json({ message: "Server Error" });
   }
-  return res.status(400).json({
-    message: "کاربر مورد نظر یافت نشد.",
-  });
+};
+
+
+exports.removeUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({
+        message: "کاربر مورد نظر یافت نشد",
+      });
+    }
+
+    return res.status(200).json({
+      message: "کاربر با موفقیت حذف شد",
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Server Error" });
+  }
 };
 exports.changeRole = async (req, res) => {
-  const { id } = req.params;
-  const isValidUserId = isValidObjectId(id);
-  if (!isValidUserId) {
-    return res.status(409).json({
-      message: "ایدی کاربر نامعتبر است .",
-    });
-  }
-  const user = await userModel.findOne({ _id: id });
-  let newRole = user.role === "ADMIN" ? "USER" : "ADMIN";
+  try {
+    const { id } = req.params;
 
-  const updateUser = await userModel.findByIdAndUpdate(id, { role: newRole });
-  if (updateUser) {
+    const { data: user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!user) {
+      return res.status(404).json({ message: "کاربر پیدا نشد" });
+    }
+
+    const newRole = user.role === "ADMIN" ? "USER" : "ADMIN";
+
+    const { data, error } = await supabase
+      .from("users")
+      .update({ role: newRole })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
     return res.json({
-      message: "نقش کاربر با موفقیت تغییر کرد.",
+      message: "نقش کاربر با موفقیت تغییر کرد",
+      user: data,
     });
+  } catch (err) {
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 exports.updateUser = async (req, res) => {
@@ -68,58 +141,66 @@ exports.updateUser = async (req, res) => {
 
     const updateFields = {
       name,
-      userName,
+      user_name: userName,
       email,
       phone,
     };
+
     if (password) {
       updateFields.password = await bcrypt.hash(password, 12);
     }
 
-    const user = await userModel
-      .findByIdAndUpdate(req.user._id, updateFields, { new: true })
-      .lean();
+    const { data, error } = await supabase
+      .from("users")
+      .update(updateFields)
+      .eq("id", req.user.id)
+      .select()
+      .single();
 
-    if (!user) {
-      return res.status(404).json({ message: "کاربر مورد نظر یافت نشد." });
+    if (error || !data) {
+      return res.status(404).json({
+        message: "کاربر مورد نظر یافت نشد",
+      });
     }
 
-    delete user.password;
+    delete data.password;
+
     return res.json({
-      message: "اطلاعات کاربر با موفقیت ویرایش شد.",
-      user: user,
+      message: "اطلاعات کاربر با موفقیت ویرایش شد",
+      user: data,
     });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "خطا,با پشتیبانی تماس بگیرید." });
+    return res.status(500).json({ message: "خطا در سرور" });
   }
 };
 exports.getProfile = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", req.user.id)
+      .single();
 
-    if (!userId) {
-      return res
-        .status(400)
-        .json({ message: "شناسه کاربر در درخواست یافت نشد." });
+    if (error || !data) {
+      return res.status(404).json({
+        message: "کاربر یافت نشد",
+      });
     }
 
-    
-    const userProfile = {
-      id: req.user._id,
-      username: req.user.userName,
-      email: req.user.email,
-      createdAt: req.user.createdAt,
-      phone: req.user.phone,
-      role: req.user.role,
-      name: req.user.name,
+    const profile = {
+      id: data.id,
+      username: data.user_name,
+      email: data.email,
+      phone: data.phone,
+      role: data.role,
+      name: data.name,
+      createdAt: data.created_at,
     };
 
-    return res.status(200).json(userProfile);
-  } catch (error) {
-    console.error("خطا در دریافت پروفایل کاربر:", error);
-    res
-      .status(500)
-      .json({ message: "خطای داخلی سرور در هنگام دریافت پروفایل." });
+    return res.status(200).json(profile);
+  } catch (err) {
+    return res.status(500).json({
+      message: "خطای داخلی سرور",
+    });
   }
 };

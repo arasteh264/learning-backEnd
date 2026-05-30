@@ -1,104 +1,115 @@
-const userModel=require("../../models/user")
+
 const bcrypt=require("bcrypt")
 const registerValidator=require("./../../validators/register")
 const jwt=require("jsonwebtoken")
-const banUserModel=require("./../../models/ban-phone")
-exports.register=async (req,res)=>{ 
-    
 
-const validationRes=registerValidator(req.body)
-if(validationRes!==true){
-    return res.status(422).json(validationRes)
+const supabase = require("../../config/supabase");
+exports.register = async (req, res) => {
+  const { userName, name, email, password, phone } = req.body;
+
+  const { data: bannedUser } = await supabase
+    .from("banned_users")
+    .select("*")
+    .eq("phone", phone)
+    .maybeSingle();
+
+  if (bannedUser) {
+    return res.status(403).json({
+      message: "حساب کاربری شما مسدود است"
+    });
+  }
+
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id")
+    .or(`email.eq."${email}",userName.eq."${userName}",phone.eq."${phone}"`);
+
+  if (existingUser?.length > 0) {
+    return res.status(409).json({
+      message: "کاربر تکراری است"
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const { count } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true });
+
+  const role = count === 0 ? "ADMIN" : "USER";
+
+  const { data, error } = await supabase
+    .from("users")
+    .insert([
+      {
+        userName,
+        name,
+        email,
+        phone,
+        password: hashedPassword,
+        role
+      }
+    ])
+    .select();
+
+  if (error) {
+    return res.status(500).json({
+      message: error.message
+    });
+  }
+
+  const { password: _, ...safeUser } = data[0];
+
+  const accessToken = jwt.sign(
+    { id: safeUser.id },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
+
+  return res.status(201).json({
+    user: safeUser,
+    accessToken,
+    message: "ثبت شد"
+  });
+};
+const { data: users, error } = await supabase
+  .from("users")
+  .select("*")
+  .or(`email.eq.${identifier},userName.eq.${identifier}`);
+
+if (error) {
+  return res.status(500).json({ message: error.message });
 }
-const {userName,name,email,password,phone}=req.body;
-const isUserBan = await banUserModel.findOne({ phone });
 
-if (isUserBan) {
-  return res.status(403).json({
-    message: "حساب کاربری شما مسدود شده است."
+const user = users?.[0];
+
+if (!user) {
+  return res.status(401).json({
+    message: "کاربر پیدا نشد"
   });
 }
-const isUserNameExists=await userModel.findOne({
-    $or :[{userName}]
-})
-const isPhoneExists=await userModel.findOne({
-    $or :[{phone}]
-})
-const isEmailExists=await userModel.findOne({
-    $or :[{email}]
-})
-if(isUserNameExists){
-    return res.status(409).json({
-        message:"نام کاربری تکراری است"
-    })
-}
-else if(isPhoneExists){
-    return res.status(409).json({
-        message:"شماره موبایل تکراری میباشد."
-    })
-}
-else if(isEmailExists){
-    return res.status(409).json({
-        message:" ایمیل تکراری میباشد."
-    })
-}
-const countOfUser=await userModel.countDocuments()
 
-const hashedPassword=await bcrypt.hash(password,10)
+const isPasswordValid = await bcrypt.compare(password, user.password);
 
-
-
-
-const user= await userModel.create({
-    email,
-    userName,
-    name,
-    phone,
-    password:hashedPassword,
-    role:countOfUser > 0 ? "USER" : "ADMIN",
-})
-const userObject=user.toObject()
-Reflect.deleteProperty(userObject,"password")
-const accessToken= jwt.sign({id:user._id},process.env.JWT_SECRET,
-   { expiresIn:"30 day",}
-)
-
-return res.status(201).json({user:userObject,accessToken,massage:"اطلاعات با موفقیت ثبت شد.",})
-}
-exports.login=async (req,res)=>{
-const {identifier,password}=req.body
-const user =await userModel.findOne({
-    $or:[{email:identifier},{userName:identifier}],
-});
-
-if(!user){
-    return res.status(401).json({
-        message:"کاربری با این مشخصات یافت نشد."
-    })
+if (!isPasswordValid) {
+  return res.status(401).json({
+    message: "رمز اشتباه است"
+  });
 }
 
-const isPasswordValid=await bcrypt.compare(password,user.password);
+const { password: _, ...safeUser } = user;
 
-if(!isPasswordValid){
-    return res.status(401).json({
-        message:"رمز عبور اشتباه است."
-    })
-}
+const accessToken = jwt.sign(
+  { id: user.id },
+  process.env.JWT_SECRET,
+  { expiresIn: "30d" }
+);
 
-const accessToken=jwt.sign({id:user._id},process.env.JWT_SECRET,{
-    expiresIn:"30 day"
-});
-
-return res.status(200).json({
+return res.json({
   accessToken,
   user: {
-    id: user._id,
-    userName: user.userName,
-    role: user.role,
-  },
+    id: safeUser.id,
+    userName: safeUser.userName,
+    role: safeUser.role
+  }
 });
-
-}
-exports.getMe=async (req,res)=>{
-
-}

@@ -1,47 +1,77 @@
-const categoryModel = require("./../../models/category");
+const { uploadFile } = require("../../config/uploadSupabase");
 exports.createCategory = async (req, res) => {
-  
   const { href, title } = req.body;
-  const category = await categoryModel.create({ title, href });
-  return res
-    .status(201)
-    .json({ category, message: "دسته بندی با موفقیت افزوده شد." });
+
+  const { data, error } = await supabase
+    .from("categories")
+    .insert([{ title, href }])
+    .select()
+    .single();
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  return res.status(201).json({
+    category: data,
+    message: "دسته بندی با موفقیت افزوده شد."
+  });
 };
 exports.getAll = async (req, res) => {
-  const category = await categoryModel.find({});
-  return res.status(200).json(category);
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*");
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  return res.status(200).json(data);
 };
 exports.updateCategory = async (req, res) => {
-  try {
-    const { title, href } = req.body;
-    const updateFields = {
-      title,
-      href,
-    };
-    const category = await categoryModel
-      .findByIdAndUpdate(req.params.id, updateFields, { new: true })
-      .lean();
-    if (!category) {
-      return res.status(404).json({ message: "کتگوری مورد نظر یافت نشد." });
-    }
+  const { title, href } = req.body;
 
-    return res.json({
-      message: "کتگوری مورد نظر با موفقیت ویرایش شد.",
-      category: category,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "خطا,با پشتیبانی تماس بگیرید." });
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ title, href })
+    .eq("id", req.params.id)
+    .select()
+    .single();
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
   }
+
+  if (!data) {
+    return res.status(404).json({
+      message: "کتگوری مورد نظر یافت نشد."
+    });
+  }
+
+  return res.json({
+    message: "کتگوری مورد نظر با موفقیت ویرایش شد.",
+    category: data
+  });
 };
 exports.removeCategory = async (req, res) => {
-  const categoryRemove = await categoryModel.findByIdAndDelete(req.params.id);
-  if (categoryRemove) {
-    return res.status(200).json({
-      message: "کتگوری مورد نظر با موفقیت حذف شد.",
+  const { data, error } = await supabase
+    .from("categories")
+    .delete()
+    .eq("id", req.params.id)
+    .select()
+    .single();
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  if (!data) {
+    return res.status(404).json({
+      message: "کتگوری مورد نظر یافت نشد."
     });
   }
-  return res.status(400).json({
-    message: "کتگوری مورد نظر یافت نشد.",
+
+  return res.status(200).json({
+    message: "کتگوری مورد نظر با موفقیت حذف شد."
   });
 };
