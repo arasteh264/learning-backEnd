@@ -1,22 +1,14 @@
-const app=require("./app");
-const mongoose=require("mongoose");
+const app = require("./app");
 require("dotenv").config();
 
-const port=3300;
-console.log(port);
-(async ()=>{
-try {
-  await mongoose.connect(process.env.MONGO_URL);
-  console.log("connected to DB");
-} catch (err) {
-  console.error("DB connection error:", err);
-}
-})();
+const port = 3300;
+
+console.log("server start:", port);
+
 app.get("/", (req, res) => {
-    console.log("header", req.header("Authorization").split(" ")[1]);
-    res.json({ message: "ok" });
+  res.json({ message: "ok" });
 });
 
-app.listen(port,()=>{
-    console.log(`server run ${port}`)
-})
+app.listen(port, () => {
+  console.log(`server run ${port}`);
+});

@@ -1,92 +1,142 @@
-const teacherModel = require("../../models/teacher");
-const userModel = require("../../models/user");
+const supabase = require("../../config/supabase");
 const jwt = require("jsonwebtoken");
-const { isValidObjectId } = require("mongoose");
 
 exports.createTeacher = async (req, res) => {
   try {
-    console.log(req.body);
-
     const { userId, bio, expertise } = req.body;
 
-    const user = await userModel.findById(userId);
+    // check user exists
+    const { data: user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
     if (!user) {
-      return res.status(404).json({
-        message: "کاربر پیدا نشد",
-      });
+      return res.status(404).json({ message: "کاربر پیدا نشد" });
     }
 
-    const existingTeacher = await teacherModel.findOne({ userId });
-    if (existingTeacher) {
+    // check duplicate teacher
+    const { data: existing } = await supabase
+      .from("teachers")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) {
       return res.status(409).json({
         message: "این کاربر قبلاً استاد شده است",
       });
     }
 
-    const teacher = await teacherModel.create({
-      userId,
-      bio,
-      expertise,
-    });
+    const { data, error } = await supabase
+      .from("teachers")
+      .insert([
+        {
+          user_id: userId,
+          bio,
+          expertise: Array.isArray(expertise)
+            ? expertise
+            : expertise.split(","),
+          is_verified: false,
+          rating: 0,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
 
     return res.status(201).json({
       message: "استاد با موفقیت ساخته شد",
-      teacher,
+      teacher: data,
     });
   } catch (err) {
-    console.log(err);
-
     return res.status(500).json({
       message: "خطای سرور",
       error: err.message,
     });
   }
 };
+
 exports.getAllTeacher = async (req, res) => {
-  const teachers = await teacherModel
-    .find({}, { password: 0 })
-    .populate("userId", "name email");
+  try {
+    const { data, error } = await supabase
+      .from("teachers")
+      .select(`
+        *,
+        users (
+          name,
+          email
+        )
+      `);
 
-  const payload = teachers.map(t => ({
-    id: t._id,
-    name: t.userId?.name,
-    email: t.userId?.email,
-    bio: t.bio,
-    expertise: t.expertise,
-    courses: t.courses,
-    rating: t.rating,
-    isVerified: t.isVerified,
-    createdAt: t.createdAt
-  }));
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
 
-  return res.json(payload);
+    const payload = data.map((t) => ({
+      id: t.id,
+      name: t.users?.name,
+      email: t.users?.email,
+      bio: t.bio,
+      expertise: t.expertise,
+      courses: t.courses,
+      rating: t.rating,
+      isVerified: t.is_verified,
+      createdAt: t.created_at,
+    }));
+
+    return res.json(payload);
+  } catch (err) {
+    return res.status(500).json({ message: "Server Error" });
+  }
 };
 
 exports.requestForTeacher = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { bio, expertise } = req.body;
 
-    // چک کن قبلاً درخواست نداده باشه
-    const existing = await teacherModel.findOne({ userId });
+    const { data: existing } = await supabase
+      .from("teachers")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
     if (existing) {
       return res.status(400).json({
         message: "شما قبلاً درخواست ثبت کرده‌اید",
       });
     }
 
-    const teacher = await teacherModel.create({
-      userId,
-      bio,
-      expertise: Array.isArray(expertise) ? expertise : expertise.split(","),
-    });
+    const { data, error } = await supabase
+      .from("teachers")
+      .insert([
+        {
+          user_id: userId,
+          bio,
+          expertise: Array.isArray(expertise)
+            ? expertise
+            : expertise.split(","),
+          is_verified: false,
+        },
+      ])
+      .select()
+      .single();
 
-    res.status(201).json({
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    return res.status(201).json({
       message: "درخواست شما ثبت شد و در انتظار تایید است",
-      data: teacher,
+      data,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "خطا در ثبت درخواست",
     });
   }
@@ -96,22 +146,23 @@ exports.verifyTeacher = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const teacher = await teacherModel.findByIdAndUpdate(
-      id,
-      { isVerified: true },
-      { new: true },
-    );
+    const { data, error } = await supabase
+      .from("teachers")
+      .update({ is_verified: true })
+      .eq("id", id)
+      .select()
+      .single();
 
-    if (!teacher) {
+    if (error || !data) {
       return res.status(404).json({ message: "پیدا نشد" });
     }
 
-    res.json({
+    return res.json({
       message: "استاد تایید شد",
-      data: teacher,
+      data,
     });
   } catch (err) {
-    res.status(500).json({ message: "خطا در تایید" });
+    return res.status(500).json({ message: "خطا در تایید" });
   }
 };
 
@@ -122,46 +173,66 @@ exports.getExpertiseList = (req, res) => {
 
 
 
-
-exports.removeTeacher=async(req,res)=>{
+exports.removeTeacher = async (req, res) => {
   try {
-      const { id } = req.params;
-const teacher=await teacherModel.findByIdAndDelete(id) 
-if(teacher) {
-  return res.status(200).json({message:"استاد مورد نظر با موفقیت حذف شد."})
-}else{
-       return res.status(404).json({ message: "استاد یافت نشد." });
-}
-  } catch (error) {
-        res.status(500).json({ message: "خطای 500 با پشتیبانی تماس بگیرید." });
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from("teachers")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({
+        message: "استاد یافت نشد",
+      });
+    }
+
+    return res.status(200).json({
+      message: "استاد مورد نظر با موفقیت حذف شد",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "خطای 500",
+    });
   }
-
-}
-
+};
 
 
 
 exports.getVerifyTeachers = async (req, res) => {
   try {
-    const teachers = await teacherModel
-      .find({ isVerified: true }, { password: 0 })
-      .populate("userId", "name email");
+    const { data, error } = await supabase
+      .from("teachers")
+      .select(`
+        id,
+        is_verified,
+        users (
+          name
+        )
+      `)
+      .eq("is_verified", true);
 
-    const payload = teachers.map(t => ({
-      id: t._id,
-      name: t.userId?.name,
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    const payload = data.map((t) => ({
+      id: t.id,
+      name: t.users?.name,
     }));
 
     return res.json({
       success: true,
       count: payload.length,
-      data: payload
+      data: payload,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
     return res.status(500).json({
       success: false,
-      message: "خطا در دریافت اساتید فعال"
+      message: "خطا در دریافت اساتید فعال",
     });
   }
 };

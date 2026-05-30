@@ -1,6 +1,5 @@
-const courseModel = require("./../../models/course");
-const sessionModel = require("./../../models/session");
-const { serialize } = require("../../utils/serialize");
+const supabase = require("../../config/supabase");
+const { uploadFile } = require("../../config/uploadSupabase");
 exports.createCourse = async (req, res) => {
   try {
     const {
@@ -15,77 +14,140 @@ exports.createCourse = async (req, res) => {
       creator,
     } = req.body;
 
-    const course = await courseModel.create({
-      name,
-      description,
-      support,
-      href,
-      price,
-      status,
-      discount,
-      category,
-      cover: req.file.filename,
-      creator,
-    });
+   if (!req.file) {
+      return res.status(400).json({
+        message: "کاور ارسال نشده است",
+      });
+    }
+        const uploaded = await uploadFile(
+      req.file,
+      "images",
+      "courses"
+    );
+    const { data, error } = await supabase
+      .from("courses")
+      .insert([
+        {
+          name,
+          description,
+          support,
+          href,
+          price,
+          status,
+          discount,
+          category_id: category,
+          creator_id: creator,
+          cover: uploaded.url,
+        },
+      ])
+      .select()
+      .single();
 
-    const mainCourse = await courseModel
-      .findById(course.id)
-      .populate("creator", "-password");
-    return res
-      .status(201)
-      .json({ mainCourse, message: "دوره با موفقیت افزوده شد." });
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(201).json({
+      course: data,
+      message: "دوره با موفقیت افزوده شد.",
+    });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
 exports.getAllCourse = async (req, res) => {
   try {
-const courses = await courseModel
-  .find({})
-  .populate({
-    path: "creator",
-    populate: {
-      path: "userId",
-      select: "name",
-    },
+    const { data: courses, error } = await supabase
+      .from("courses")
+      .select(`
+        *,
+        teachers:creator_id (
+          id,
+          bio,
+          rating,
+          user_id
+        ),
+        categories:category_id (
+          id,
+          title
+        )
+      `);
+
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+
+
+const formatted = await Promise.all(
+  courses.map(async (course) => {
+    const { count } = await supabase
+      .from("sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("course_id", course.id);
+
+    return {
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      price: course.price,
+      status: course.status,
+      discount: course.discount,
+
+      creator: course.teachers?.user_id,
+      category: course.categories?.title,
+
+      cover: course.cover
+  ? course.cover
+  : null,
+
+      sessionCount: count || 0,
+    };
   })
-  .populate("category", "title")
-  .lean();
-
-
-    const formatted = await Promise.all(
-      courses.map(async (course) => {
-        const sessionCount = await sessionModel.countDocuments({
-          course: course._id,
-        });
-
-        return {
-          ...serialize(course),
-          creator: course.creator?.userId?.name,
-          category: course.category?.title,
-          cover: `${req.protocol}://${req.get("host")}/course/covers/${course.cover}`,
-          sessionCount,
-        };
-      })
-    );
+);
 
     return res.status(200).json(formatted);
   } catch (err) {
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "خطای سیستمی با پشتیبانی تماس بگیرید." });
   }
 };
 
 exports.removeCourse = async (req, res) => {
   try {
-    const course = await courseModel.findById(req.params.id);
+    const courseId = req.params.id;
 
-    if (!course) {
+    // 1. check existence first
+    const { data: existingCourse, error: findError } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", courseId)
+      .single();
+
+    if (findError || !existingCourse) {
       return res.status(404).json({ message: "دوره یافت نشد" });
     }
 
-    await sessionModel.deleteMany({ course: course.id });
-    await course.deleteOne();
+    // 2. delete sessions first (optional but correct design)
+    await supabase
+      .from("sessions")
+      .delete()
+      .eq("course_id", courseId);
+
+    // 3. delete course
+    const { error: deleteError } = await supabase
+      .from("courses")
+      .delete()
+      .eq("id", courseId);
+
+    if (deleteError) {
+      return res.status(500).json({ message: deleteError.message });
+    }
 
     return res.status(200).json({
       message: "دوره و تمام جلسات با موفقیت حذف شد.",
@@ -98,33 +160,61 @@ exports.removeCourse = async (req, res) => {
 };
 
 exports.getCourseDetail = async (req, res) => {
+
   try {
     const { id } = req.params;
 
-    const course = await courseModel
-      .findById(id)
-      .populate("creator", "name")
-      .populate("category", "title")
-      .lean(); 
+    const { data: course, error } = await supabase
+      .from("courses")
+      .select(`
+        *,
+        categories (
+          id,
+          title
+        ),
+        teachers (
+          id,
+          bio,
+          user_id,
+          users (
+            id,
+            name
+          )
+        )
+      `)
+      .eq("id", id)
+      .single();
 
-    if (!course) {
-      return res.status(404).json({ message: "دوره یافت نشد" });
+    if (error || !course) {
+      return res.status(404).json({
+        message: "دوره یافت نشد",
+      });
     }
-
-    const sessionCount = await sessionModel.countDocuments({
-      course: course._id,
-    });
+    const { count } = await supabase
+      .from("sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("course_id", id);
 
     const result = {
-      ...course,
-      id: course._id,
-      creatorId: course.creator?._id,
-      categoryId: course.category?._id,
-      cover: `${req.protocol}://${req.get("host")}/course/covers/${course.cover}`,
-      sessionCount,
-    };
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      support: course.support,
+      href: course.href,
+      price: course.price,
+      status: course.status,
+      discount: course.discount,
 
-    delete result._id;
+      category: course.categories?.title,
+
+      creator: course.teachers?.users?.name,
+
+      cover: course.cover
+  ? course.cover
+  : null,
+
+      sessionCount: count || 0,
+    };
 
     return res.status(200).json(result);
   } catch (error) {
@@ -132,6 +222,7 @@ exports.getCourseDetail = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 exports.updateCourse = async (req, res) => {
   try {
@@ -149,14 +240,17 @@ exports.updateCourse = async (req, res) => {
       creator,
     } = req.body;
 
-    const course = await courseModel.findById(id);
+    const { data: existingCourse, error: findError } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-    if (!course) {
+    if (findError || !existingCourse) {
       return res.status(404).json({
         message: "دوره یافت نشد",
       });
     }
-;
 
     const updateData = {
       name,
@@ -174,13 +268,31 @@ exports.updateCourse = async (req, res) => {
       updateData.cover = req.file.filename;
     }
 
-    const updatedCourse = await courseModel.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
-      }
-    ).populate("creator", "-password");
+   const { data: updatedCourse, error } = await supabase
+      .from("courses")
+      .update(updateData)
+      .eq("id", id)
+      .select(`
+        *,
+        categories (
+          id,
+          title
+        ),
+        teachers (
+          id,
+          bio,
+          users (
+            name
+          )
+        )
+      `)
+      .single();
+
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
 
     return res.status(200).json({
       message: "دوره با موفقیت ویرایش شد",
@@ -209,19 +321,37 @@ exports.createSession = async (req, res) => {
         message: "ویدیو ارسال نشده است",
       });
     }
+const uploaded = await uploadFile(
+  req.file,
+  "videos",
+  "sessions"
+);
 
-    const session = await sessionModel.create({
-      title,
-      time,
-      free,
-      video: req.file.filename,
-      course: id,
-    });
+    const { data, error } = await supabase
+      .from("sessions")
+      .insert([
+        {
+          title,
+          time,
+          free: free === "1" || free === 1,
+          video: uploaded.url,
+          course_id: id,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
 
     return res.status(201).json({
       message: "قسمت مورد نظر با موفقیت افزوده شد.",
-      session,
+      session: data,
     });
+
   } catch (error) {
     console.log(error);
 
@@ -231,60 +361,123 @@ exports.createSession = async (req, res) => {
   }
 };
 
-exports.getAllSession=async(req,res)=>{
-  const sessions=await sessionModel.find({}).populate("course","name").lean();
-  console.log(sessions);
-  
-      const formatted = await Promise.all(
-      sessions.map(async (item) => {
+exports.getAllSession = async (req, res) => {
+  try {
+    const { data: sessions, error } = await supabase
+      .from("sessions")
+      .select(`
+        *,
+        courses (
+          id,
+          name
+        )
+      `);
 
-        return {
-          ...serialize(item),
-          courseName:item.course.name,
-          video: `${req.protocol}://${req.get("host")}/session/videos/${item.video}`,
-        };
-      })
-    );
-  return res.status(200).json(formatted)
-}
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  
+
+    const formatted = sessions.map((item) => {
+      return {
+        id: item.id,
+        title: item.title,
+        time: item.time,
+        free: item.free,
+
+        courseName: item.courses?.name,
+
+        video: `${req.protocol}://${req.get(
+          "host"
+        )}/session/videos/${item.video}`,
+      };
+    });
+  
+    return res.status(200).json(formatted);
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
 
 exports.removeSession = async (req, res) => {
   try {
-    const session = await sessionModel.findByIdAndDelete(req.params.id);
+    const sessionId = req.params.id;
 
-    if (!session) {
-      return res.status(404).json({ message: "جلسه یافت نشد" });
+    // 1. check existence
+    const { data: session, error: findError } = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("id", sessionId)
+      .single();
+
+    if (findError || !session) {
+      return res.status(404).json({
+        message: "جلسه یافت نشد",
+      });
     }
 
+    const { error: deleteError } = await supabase
+      .from("sessions")
+      .delete()
+      .eq("id", sessionId);
+
+    if (deleteError) {
+      return res.status(500).json({
+        message: deleteError.message,
+      });
+    }
     return res.status(200).json({
       message: "جلسه مورد نظر حذف شد.",
     });
 
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
+
 
 exports.getSessionDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const session = await sessionModel
-      .findById(id)
-      .populate("course", "name")
-      .lean();
+    const { data: session, error } = await supabase
+      .from("sessions")
+      .select(`
+        *,
+        courses (
+          id,
+          name
+        )
+      `)
+      .eq("id", id)
+      .single();
 
-    if (!session) {
+    if (error || !session) {
       return res.status(404).json({
         message: "جلسه یافت نشد",
       });
     }
 
     const result = {
-      ...serialize(session),
-      course: session.course._id,
-      video: `${req.protocol}://${req.get("host")}/session/videos/${session.video}`,
+      id: session.id,
+      title: session.title,
+      time: session.time,
+      free: session.free,
+
+      course: session.courses?.id,
+
+      video: `${req.protocol}://${req.get(
+        "host"
+      )}/session/videos/${session.video}`,
     };
 
     return res.status(200).json(result);
@@ -309,9 +502,13 @@ exports.updateSession = async (req, res) => {
       course,
     } = req.body;
 
-    const session = await sessionModel.findById(id);
+    const { data: existingSession, error: findError } = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-    if (!session) {
+    if (findError || !existingSession) {
       return res.status(404).json({
         message: "جلسه یافت نشد",
       });
@@ -320,26 +517,41 @@ exports.updateSession = async (req, res) => {
     const updateData = {
       title,
       time,
-      free,
-      course,
+      free: free === "1" || free === true,
+      course_id: course,
     };
 
-    if (req.file) {
-      updateData.video = req.file.filename;
+  if (req.file) {
+  const uploaded = await uploadFile(
+    req.file,
+    "videos",
+    "sessions"
+  );
+
+  updateData.video = uploaded.url;
+}
+
+    const { data: updatedSession, error } = await supabase
+      .from("sessions")
+      .update(updateData)
+      .eq("id", id)
+      .select(`
+        *,
+        courses (
+          id,
+          name
+        )
+      `)
+      .single();
+
+       if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
     }
 
-    const updatedSession =
-      await sessionModel.findByIdAndUpdate(
-        id,
-        updateData,
-        {
-          new: true,
-        }
-      );
-
     return res.status(200).json({
-      message:
-        "جلسه با موفقیت ویرایش شد",
+      message: "جلسه با موفقیت ویرایش شد",
       session: updatedSession,
     });
 
@@ -347,8 +559,7 @@ exports.updateSession = async (req, res) => {
     console.log(error);
 
     return res.status(500).json({
-      message:
-        "خطا در ویرایش جلسه",
+      message: "خطا در ویرایش جلسه",
     });
   }
 };
