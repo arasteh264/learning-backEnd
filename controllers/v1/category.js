@@ -1,3 +1,4 @@
+const supabase = require("../../config/supabase");
 const { uploadFile } = require("../../config/uploadSupabase");
 exports.createCategory = async (req, res) => {
   const { href, title } = req.body;

@@ -1,5 +1,6 @@
 const supabase = require("../../config/supabase");
 const { uploadFile } = require("../../config/uploadSupabase");
+const { deleteFile } = require("../../config/storageSupabase");
 exports.createCourse = async (req, res) => {
   try {
     const {
@@ -145,6 +146,10 @@ exports.removeCourse = async (req, res) => {
       .delete()
       .eq("id", courseId);
 
+      if (existingCourse.cover) {
+  await deleteFile(existingCourse.cover, "images");
+}
+
     if (deleteError) {
       return res.status(500).json({ message: deleteError.message });
     }
@@ -240,33 +245,57 @@ exports.updateCourse = async (req, res) => {
       creator,
     } = req.body;
 
-    const { data: existingCourse, error: findError } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("id", id)
-      .single();
+if (req.file) {
 
-    if (findError || !existingCourse) {
-      return res.status(404).json({
-        message: "دوره یافت نشد",
-      });
-    }
+  await deleteFile(existingCourse.cover, "images");
+  const uploaded = await uploadFile(
+    req.file,
+    "images",
+    "courses"
+  );
 
-    const updateData = {
-      name,
-      description,
-      support,
-      href,
-      price,
-      status,
-      discount,
-      category,
-      creator,
-    };
+  updateData.cover = uploaded.url;
+}
+const { data: existingCourse, error: findError } = await supabase
+  .from("courses")
+  .select("*")
+  .eq("id", id)
+  .single();
 
-    if (req.file) {
-      updateData.cover = req.file.filename;
-    }
+if (findError || !existingCourse) {
+  return res.status(404).json({
+    message: "دوره یافت نشد",
+  });
+}
+
+const updateData = {
+  name,
+  description,
+  support,
+  href,
+  price,
+  status,
+  discount,
+  category_id: category,
+  creator_id: creator,
+};
+
+if (req.file) {
+  if (existingCourse.cover) {
+    await deleteFile(existingCourse.cover, "images");
+  }
+
+  const uploaded = await uploadFile(
+    req.file,
+    "images",
+    "courses"
+  );
+
+  updateData.cover = uploaded.url;
+}
+
+
+
 
    const { data: updatedCourse, error } = await supabase
       .from("courses")
@@ -389,9 +418,7 @@ exports.getAllSession = async (req, res) => {
 
         courseName: item.courses?.name,
 
-        video: `${req.protocol}://${req.get(
-          "host"
-        )}/session/videos/${item.video}`,
+        video: item.video
       };
     });
   
@@ -421,7 +448,16 @@ exports.removeSession = async (req, res) => {
         message: "جلسه یافت نشد",
       });
     }
+const { data: sessions } = await supabase
+  .from("sessions")
+  .select("video")
+  .eq("course_id", courseId);
 
+for (const s of sessions || []) {
+  if (s.video) {
+    await deleteFile(s.video, "videos");
+  }
+}
     const { error: deleteError } = await supabase
       .from("sessions")
       .delete()
@@ -475,9 +511,7 @@ exports.getSessionDetail = async (req, res) => {
 
       course: session.courses?.id,
 
-      video: `${req.protocol}://${req.get(
-        "host"
-      )}/session/videos/${session.video}`,
+      video: session.video
     };
 
     return res.status(200).json(result);
