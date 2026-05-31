@@ -156,7 +156,7 @@ const options = {
         MessageResponse: {
           type: "object",
           properties: {
-            message: { type: "string", example: "Operation completed" },
+            message: { type: "string", example: "با موفقیت انجام شد" },
           },
         },
         AuthRegisterBody: {
