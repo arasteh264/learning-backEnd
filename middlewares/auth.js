@@ -1,50 +1,33 @@
-// const jwt =require("jsonwebtoken");
-// const userModel=require("./../models/user");
-// module.exports=async (req,res,next)=>{
-//     const authHeader=req.header("Authorization")?.split("")[1]
-//     if(authHeader?.length !== 2){
-//         return res.status(403).json({message:"شما دسترسی به این ادرس را ندارید."})
-//     }
-//     const token=authHeader[1];
-//     try {
-//         const jwtPaylod=jwt.verify(token,process.env.JWT_SECRET);
-
-//         const user=await userModel.findById(jwtPaylod.id).lean();
-//         Reflect.deleteProperty(user,"password")
-//         req.user=user;
-//         next();
-//     } catch (error) {
-//         return res.json(error)
-//     }
-// }
 const jwt = require("jsonwebtoken");
-const userModel = require("./../models/user");
+const supabase = require("../config/supabase");
 
 module.exports = async (req, res, next) => {
-   
-    
-    const authHeader = req.header("Authorization");
+  const authHeader = req.header("Authorization");
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(403).json({ message: "شما دسترسی به این ادرس را ندارید." });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(403).json({ message: "شما دسترسی به این ادرس را ندارید." });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const jwtPayload = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", jwtPayload.id)
+      .single();
+
+    if (error || !user) {
+      return res.status(401).json({ message: "کاربر یافت نشد" });
     }
 
-    const token = authHeader.split(" ")[1];
+    delete user.password;
 
-    try {
-        const jwtPayload = jwt.verify(token, process.env.JWT_SECRET);
-
-        const user = await userModel.findById(jwtPayload.id).lean();
-
-        if (!user) {
-            return res.status(401).json({ message: "کاربر یافت نشد" });
-        }
-
-        Reflect.deleteProperty(user, "password");
-
-        req.user = user;
-        next();
-    } catch (error) {
-        return res.status(401).json({ message: "توکن نامعتبر است" });
-    }
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "توکن نامعتبر است" });
+  }
 };

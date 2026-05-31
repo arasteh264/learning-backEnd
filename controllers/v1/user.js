@@ -1,7 +1,6 @@
 const supabase = require("../../config/supabase");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { isValidObjectId } = require("mongoose");
 
 exports.banUser = async (req, res) => {
   try {

@@ -21,16 +21,17 @@ exports.register = async (req, res) => {
     });
   }
 
-  const { data: existingUser } = await supabase
-    .from("users")
-    .select("id")
-    .or(`email.eq."${email}",userName.eq."${userName}",phone.eq."${phone}"`);
+ const { data: existingUser } = await supabase
+  .from("users")
+  .select("id")
+  .or(`email.eq."${email}",username.eq."${userName}",phone.eq."${phone}"`);
 
   if (existingUser?.length > 0) {
     return res.status(409).json({
       message: "کاربر تکراری است"
     });
   }
+
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -44,7 +45,7 @@ exports.register = async (req, res) => {
     .from("users")
     .insert([
       {
-        userName,
+        username: userName,
         name,
         email,
         phone,
@@ -81,7 +82,7 @@ exports.login = async (req, res) => {
     const { data: users, error } = await supabase
       .from("users")
       .select("*")
-      .or(`email.eq.${identifier},userName.eq.${identifier}`);
+      .or(`email.eq.${identifier},username.eq.${identifier}`);
 
     if (error) {
       return res.status(500).json({ message: error.message });
@@ -115,7 +116,7 @@ exports.login = async (req, res) => {
       accessToken,
       user: {
         id: safeUser.id,
-        userName: safeUser.userName,
+        userName: safeUser.username,
         role: safeUser.role
       }
     });
