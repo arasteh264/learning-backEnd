@@ -1,8 +1,12 @@
-const { createClient } = require('@supabase/supabase-js');
+const { createClient } = require("@supabase/supabase-js");
 
-const supabase = createClient(
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  throw new Error("❌ Missing SUPABASE env variables");
+}
+
+ const supabase =  createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
 );
-
+ 
 module.exports = supabase;

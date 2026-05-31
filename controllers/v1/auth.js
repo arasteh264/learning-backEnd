@@ -1,10 +1,12 @@
 
+const supabase = require("../../config/supabase");
 const bcrypt=require("bcrypt")
 const registerValidator=require("./../../validators/register")
 const jwt=require("jsonwebtoken")
 
-const supabase = require("../../config/supabase");
 exports.register = async (req, res) => {
+  console.log("slm");
+  
   const { userName, name, email, password, phone } = req.body;
 
   const { data: bannedUser } = await supabase
@@ -72,44 +74,55 @@ exports.register = async (req, res) => {
     message: "ثبت شد"
   });
 };
-const { data: users, error } = await supabase
-  .from("users")
-  .select("*")
-  .or(`email.eq.${identifier},userName.eq.${identifier}`);
+exports.login = async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
 
-if (error) {
-  return res.status(500).json({ message: error.message });
-}
+    const { data: users, error } = await supabase
+      .from("users")
+      .select("*")
+      .or(`email.eq.${identifier},userName.eq.${identifier}`);
 
-const user = users?.[0];
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
 
-if (!user) {
-  return res.status(401).json({
-    message: "کاربر پیدا نشد"
-  });
-}
+    const user = users?.[0];
 
-const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!user) {
+      return res.status(401).json({
+        message: "کاربر پیدا نشد"
+      });
+    }
 
-if (!isPasswordValid) {
-  return res.status(401).json({
-    message: "رمز اشتباه است"
-  });
-}
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-const { password: _, ...safeUser } = user;
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        message: "رمز اشتباه است"
+      });
+    }
 
-const accessToken = jwt.sign(
-  { id: user.id },
-  process.env.JWT_SECRET,
-  { expiresIn: "30d" }
-);
+    const { password: _, ...safeUser } = user;
 
-return res.json({
-  accessToken,
-  user: {
-    id: safeUser.id,
-    userName: safeUser.userName,
-    role: safeUser.role
+    const accessToken = jwt.sign(
+      { id: user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    return res.json({
+      accessToken,
+      user: {
+        id: safeUser.id,
+        userName: safeUser.userName,
+        role: safeUser.role
+      }
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message
+    });
   }
-});
+};

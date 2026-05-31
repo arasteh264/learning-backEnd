@@ -2,7 +2,7 @@ const express = require("express");
 const courseController = require("../../controllers/v1/course");
 const authMiddleware = require("../../middlewares/auth");
 const isAdminMiddleware = require("../../middlewares/IsAdmin");
-const uploader = require("../../utils/uploader");
+const uploader = require("../../middlewares/upload");
 const router = express.Router();
 
 //برای دریافت لیست کلی دوره
@@ -14,7 +14,7 @@ router
 router.route("/:id/session").post(
   authMiddleware,
   isAdminMiddleware,
-  uploader("session/videos").single("video"),
+  uploader.single("video"),
   courseController.createSession
 );
 
@@ -28,13 +28,13 @@ router
   .route("/session/:id")
   .get(authMiddleware, isAdminMiddleware, courseController.getSessionDetail)
   .delete(authMiddleware,isAdminMiddleware,courseController.removeSession)
-  .put(authMiddleware,isAdminMiddleware, uploader("session/videos").single("video"),courseController.updateSession)
+  .put(authMiddleware,isAdminMiddleware, uploader.single("video"),courseController.updateSession)
 
 //برای ایجاد دوره
 router.route("/").post(
   authMiddleware,
   isAdminMiddleware,
-  uploader("course/covers").single("cover"),
+  uploader.single("cover"),
   courseController.createCourse
 );
 
@@ -56,7 +56,7 @@ router
   .patch(
     authMiddleware,
     isAdminMiddleware,
-    uploader("course/covers").single("cover"),
+    uploader.single("cover"),
     courseController.updateCourse
   );
 
