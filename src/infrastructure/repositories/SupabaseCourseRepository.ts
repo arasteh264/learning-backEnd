@@ -2,7 +2,6 @@ import supabase from "../../config/supabase";
 import { CourseRepository } from "../../domain/repositories/CourseRepository";
 
 export class SupabaseCourseRepository implements CourseRepository {
-
   async create(data: any) {
     const { data: result, error } = await supabase
       .from("courses")
@@ -15,15 +14,24 @@ export class SupabaseCourseRepository implements CourseRepository {
   }
 
   async findAll() {
-    const { data, error } = await supabase
-      .from("courses")
-      .select(`
+    const { data, error } = await supabase.from("courses").select(`
         *,
-        teachers:creator_id(*),
-        categories:category_id(*)
+        teachers:creator_id (
+          id,
+          bio,
+          rating,
+          user_id
+        ),
+        categories:category_id (
+          id,
+          title
+        )
       `);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
+
     return data;
   }
 
@@ -51,10 +59,7 @@ export class SupabaseCourseRepository implements CourseRepository {
   }
 
   async delete(id: string) {
-    const { error } = await supabase
-      .from("courses")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("courses").delete().eq("id", id);
 
     if (error) throw error;
   }
