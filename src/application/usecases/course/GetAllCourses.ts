@@ -1,6 +1,6 @@
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
 
-export class GetAllCourses {
+export class GetAllCoursesUseCase {
   constructor(private courseRepo: CourseRepository) {}
 
   async execute() {

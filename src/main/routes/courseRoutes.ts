@@ -1,13 +1,32 @@
 import express from "express";
-
-import { createCourseUseCase } from "../container";
-import { createCourseController } from "../../interfaces/controllers/v1/controllers/course.controller";
+import { courseController } from "../container";
 
 const router = express.Router();
 
 router.post(
   "/courses",
-  createCourseController(createCourseUseCase)
+  courseController.createCourse
+);
+
+router.get(
+  "/courses",
+  courseController.getAllCourses
+);
+
+// router.get(
+//   "/courses/:id",
+//   courseController.getCourse
+// );
+
+router.put(
+  "/courses/:id",
+  courseController.updateCourse
+);
+
+
+router.delete(
+  "/courses/:id",
+  courseController.deleteCourse
 );
 
 export default router;

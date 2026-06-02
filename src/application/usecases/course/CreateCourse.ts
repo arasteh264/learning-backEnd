@@ -1,6 +1,6 @@
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
 
-export class CreateCourse {
+export class CreateCourseUseCase {
   constructor(
     private courseRepo: CourseRepository,
     private storageService: any
