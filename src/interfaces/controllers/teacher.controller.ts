@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { CreateTeacherUseCase } from "../../../application/usecases/teacher/CreateTeacher";
-import { GetAllTeachersUseCase } from "../../../application/usecases/teacher/GetAllTeachers";
-import { RequestForTeacherUseCase } from "../../../application/usecases/teacher/RequestForTeacher";
-import { VerifyTeacherUseCase } from "../../../application/usecases/teacher/VerifyTeacher";
-import { RemoveTeacherUseCase } from "../../../application/usecases/teacher/RemoveTeacher";
-import { GetVerifiedTeachersUseCase } from "../../../application/usecases/teacher/GetVerifiedTeachers";
+import { CreateTeacherUseCase } from "../../application/usecases/teacher/CreateTeacher";
+import { GetAllTeachersUseCase } from "../../application/usecases/teacher/GetAllTeachers";
+import { RequestForTeacherUseCase } from "../../application/usecases/teacher/RequestForTeacher";
+import { VerifyTeacherUseCase } from "../../application/usecases/teacher/VerifyTeacher";
+import { RemoveTeacherUseCase } from "../../application/usecases/teacher/RemoveTeacher";
+import { GetVerifiedTeachersUseCase } from "../../application/usecases/teacher/GetVerifiedTeachers";
 export class TeacherController {
   constructor(
     private createTeacherUC: CreateTeacherUseCase,
