@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { CreateSessionUseCase } from "../../../application/usecases/session/CreateSession";
-import { GetAllSessionsUseCase } from "../../../application/usecases/session/GetAllSessions";
-import { DeleteSessionUseCase } from "../../../application/usecases/session/DeleteSession";
-import { UpdateSessionUseCase } from "../../../application/usecases/session/UpdateSession";
+
+import { GetAllSessionsUseCase } from "../../application/usecases/session/GetAllSessions";
+import { DeleteSessionUseCase } from "../../application/usecases/session/DeleteSession";
+import { UpdateSessionUseCase } from "../../application/usecases/session/UpdateSession";
+import { CreateSessionUseCase } from "../../application/usecases/session/CreateSession";
 export class SessionController {
   constructor(
     private createSession: CreateSessionUseCase,

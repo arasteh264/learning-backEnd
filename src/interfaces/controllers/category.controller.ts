@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { CreateCategoryUseCase } from "../../../application/usecases/category/CreateCategory";
-import { GetAllCategoriesUseCase } from "../../../application/usecases/category/GetAllCategories";
-import { UpdateCategoryUseCase } from "../../../application/usecases/category/UpdateCategory";
-import { DeleteCategoryUseCase } from "../../../application/usecases/category/DeleteCategory";
+import { CreateCategoryUseCase } from "../../application/usecases/category/CreateCategory";
+import { GetAllCategoriesUseCase } from "../../application/usecases/category/GetAllCategories";
+import { UpdateCategoryUseCase } from "../../application/usecases/category/UpdateCategory";
+import { DeleteCategoryUseCase } from "../../application/usecases/category/DeleteCategory";
 export class CategoryController {
   constructor(
     private createUseCase: CreateCategoryUseCase,

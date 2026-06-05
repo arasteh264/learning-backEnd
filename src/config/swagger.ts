@@ -1,4 +1,4 @@
-const swaggerJsdoc = require("swagger-jsdoc");
+import swaggerJsdoc from "swagger-jsdoc";
 
 const uuidParam = (name: string, description: string) => ({
   name,
@@ -931,4 +931,6 @@ const options = {
   apis: [],
 };
 
-module.exports = swaggerJsdoc(options);
+const swaggerSpec = swaggerJsdoc(options);
+
+export default swaggerSpec;

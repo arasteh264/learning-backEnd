@@ -4,6 +4,7 @@ import { SupabaseAuthRepository } from "../infrastructure/repositories/SupabaseA
 import { SupabaseSessionRepository } from "../infrastructure/repositories/SupabaseSessionRepository";
 import { SupabaseCategoryRepository } from "../infrastructure/repositories/SupabaseCategoryRepository";
 import { SupabaseUserRepository } from "../infrastructure/repositories/SupabaseUserRepository";
+import { SupabaseTeacherRepository } from "../infrastructure/repositories/SupabaseTeacherRepository";
 
 //  controllers
 import { CourseController } from "../interfaces/controllers/course.controller";
@@ -11,6 +12,7 @@ import { AuthController } from "../interfaces/controllers/auth.controller";
 import { SessionController } from "../interfaces/controllers/session.controller";
 import { CategoryController } from "../interfaces/controllers/category.controller";
 import { UserController } from "../interfaces/controllers/user.controller";
+import { TeacherController } from "../interfaces/controllers/teacher.controller";
 
 // services
 import { BcryptPasswordService } from "../infrastructure/services/BcryptPasswordService";
@@ -41,9 +43,12 @@ import { UpdateUserUseCase } from "../application/usecases/user/UpdateUserUseCas
 import { ChangeRoleUseCase } from "../application/usecases/user/ChangeRoleUseCase";
 import { GetAllUsersUseCase } from "../application/usecases/user/GetAllUsersUseCase";
 import { BanUserUseCase } from "../application/usecases/user/BanUserUseCase";
-import { SupabaseTeacherRepository } from "../infrastructure/repositories/SupabaseTeacherRepository";
-import { TeacherController } from "../interfaces/controllers/teacher.controller";
 import { CreateTeacherUseCase } from "../application/usecases/teacher/CreateTeacher";
+import { GetVerifiedTeachersUseCase } from "../application/usecases/teacher/GetVerifiedTeachers";
+import { RemoveTeacherUseCase } from "../application/usecases/teacher/RemoveTeacher";
+import { VerifyTeacherUseCase } from "../application/usecases/teacher/VerifyTeacher";
+import { RequestForTeacherUseCase } from "../application/usecases/teacher/RequestForTeacher";
+import { GetAllTeachersUseCase } from "../application/usecases/teacher/GetAllTeachers";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -94,8 +99,12 @@ const deleteCourseUseCase = new DeleteCourseUseCase(
   storage,
 );
 
-const createTeacherUseCase=new CreateTeacherUseCase(teacherRepo);
-
+const createTeacherUseCase = new CreateTeacherUseCase(teacherRepo);
+const getVerifiedTeachersUseCase = new GetVerifiedTeachersUseCase(teacherRepo);
+const removeTeacherUseCase = new RemoveTeacherUseCase(teacherRepo);
+const verifyTeacherUseCase = new VerifyTeacherUseCase(teacherRepo);
+const requestForTeacherUseCase = new RequestForTeacherUseCase(teacherRepo);
+const getAllTeachersUseCase = new GetAllTeachersUseCase(teacherRepo);
 
 // controllers
 export const courseController = new CourseController(
@@ -131,10 +140,10 @@ export const userController = new UserController(
 );
 
 export const teacherController = new TeacherController(
-  CreateTeacherUseCase,
-  GetVerifiedTeachersUseCase,
-  RemoveTeacherUseCase,
-  VerifyTeacherUseCase,
-  RequestForTeacherUseCase,
-  GetAllTeachersUseCase,
+  createTeacherUseCase,
+  getAllTeachersUseCase,
+  requestForTeacherUseCase,
+  verifyTeacherUseCase,
+  removeTeacherUseCase,
+  getVerifiedTeachersUseCase,
 );

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { UpdateCourseUseCase } from "../../../application/usecases/course/UpdateCourse";
-import { CreateCourseUseCase } from "../../../application/usecases/course/CreateCourse";
-import { DeleteCourseUseCase } from "../../../application/usecases/course/DeleteCourse";
-import { GetAllCoursesUseCase } from "../../../application/usecases/course/GetAllCourses";
+import { UpdateCourseUseCase } from "../../application/usecases/course/UpdateCourse";
+import { CreateCourseUseCase } from "../../application/usecases/course/CreateCourse";
+import { DeleteCourseUseCase } from "../../application/usecases/course/DeleteCourse";
+import { GetAllCoursesUseCase } from "../../application/usecases/course/GetAllCourses";
 
 export class CourseController {
   constructor(
@@ -17,7 +17,7 @@ export class CourseController {
       const result = await this.updateCourseUseCase.execute(
         req.params.id as string,
         req.body,
-        req.file as Express.Multer.File,
+        req.file,
       );
 
       return res.status(200).json({
@@ -35,7 +35,7 @@ export class CourseController {
     try {
       const result = await this.createCourseUseCase.execute(
         req.body,
-        req.file as Express.Multer.File,
+        req.file ,
       );
 
       return res.status(201).json({

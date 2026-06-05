@@ -31,11 +31,11 @@ router.post(
   teacherController.verify
 );
 
-router.get(
-  "/expertises",
-  authMiddleware,
-  teacherController.getExpertiseList
-);
+// router.get(
+//   "/expertises",
+//   authMiddleware,
+//   teacherController.getExpertiseList
+// );
 
 router.delete(
   "/:id",

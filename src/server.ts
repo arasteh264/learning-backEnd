@@ -1,13 +1,11 @@
 import dotenv from "dotenv";
-import app from "./app";
-
 dotenv.config();
 
-const port: number = 3300;
+import app from "./app";
 
-console.log("server start:", port);
+const port = Number(process.env.PORT) || 3300;
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({ message: "ok" });
 });
 
