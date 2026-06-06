@@ -37,11 +37,19 @@ export class UserController {
   };
 
   update = async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const result = await this.updateUser.execute(req.user.id, req.body);
     return res.json(result);
   };
 
   profile = async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const result = await this.getProfile.execute(req.user.id);
     return res.json(result);
   };

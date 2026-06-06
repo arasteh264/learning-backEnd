@@ -3,7 +3,19 @@ import { UpdateCourseUseCase } from "../../application/usecases/course/UpdateCou
 import { CreateCourseUseCase } from "../../application/usecases/course/CreateCourse";
 import { DeleteCourseUseCase } from "../../application/usecases/course/DeleteCourse";
 import { GetAllCoursesUseCase } from "../../application/usecases/course/GetAllCourses";
-
+type MulterRequest = Request & { 
+  file?: {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    size: number;
+    destination: string;
+    filename: string;
+    path: string;
+    buffer: Buffer;
+  }
+};
 export class CourseController {
   constructor(
     private createCourseUseCase: CreateCourseUseCase,
@@ -12,7 +24,7 @@ export class CourseController {
     private getAllCoursesUseCase: GetAllCoursesUseCase,
   ) {}
 
-  updateCourse = async (req: Request, res: Response) => {
+  updateCourse = async (req: MulterRequest, res: Response) => {
     try {
       const result = await this.updateCourseUseCase.execute(
         req.params.id as string,
@@ -31,7 +43,7 @@ export class CourseController {
     }
   };
 
-  createCourse = async (req: Request, res: Response) => {
+  createCourse = async (req: MulterRequest, res: Response) => {
     try {
       const result = await this.createCourseUseCase.execute(
         req.body,

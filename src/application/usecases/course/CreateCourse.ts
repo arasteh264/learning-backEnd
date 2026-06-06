@@ -1,17 +1,19 @@
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
+import { Course } from "../../../domain/entities/Course";
+import { IStorageService } from "../../../domain/services/IStorageService";
 
 export class CreateCourseUseCase {
   constructor(
     private courseRepo: CourseRepository,
-    private storageService: any
+    private storageService: IStorageService
   ) {}
 
-  async execute(data: any, file: any) {
+  async execute(data: Partial<Course>, file?: Express.Multer.File) {
     if (!file) {
       throw new Error("Cover is required");
     }
 
-    const uploaded = await this.storageService.uploadFile(
+    const uploaded = await this.storageService.upload(
       file,
       "images",
       "courses"

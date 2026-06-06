@@ -4,6 +4,19 @@ import { GetAllSessionsUseCase } from "../../application/usecases/session/GetAll
 import { DeleteSessionUseCase } from "../../application/usecases/session/DeleteSession";
 import { UpdateSessionUseCase } from "../../application/usecases/session/UpdateSession";
 import { CreateSessionUseCase } from "../../application/usecases/session/CreateSession";
+type MulterRequest = Request & {
+  file?: {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    size: number;
+    destination: string;
+    filename: string;
+    path: string;
+    buffer: Buffer;
+  };
+};
 export class SessionController {
   constructor(
     private createSession: CreateSessionUseCase,
@@ -12,7 +25,7 @@ export class SessionController {
     private deleteSession: DeleteSessionUseCase,
   ) {}
 
-  create = async (req: Request, res: Response) => {
+  create = async (req: MulterRequest, res: Response) => {
     try {
       const result = await this.createSession.execute(
         req.body,
@@ -31,7 +44,7 @@ export class SessionController {
     return res.json(result);
   };
 
-  update = async (req: Request, res: Response) => {
+  update = async (req: MulterRequest, res: Response) => {
     try {
       const result = await this.updateSession.execute(
         req.params.id as string,
