@@ -37,6 +37,10 @@ export class TeacherController {
 
   request = async (req: Request, res: Response) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       const result = await this.requestTeacherUC.execute(
         req.user.id,
         req.body.bio,

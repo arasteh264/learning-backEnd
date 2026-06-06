@@ -1,12 +1,12 @@
 
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
-import { ISessionRepository } from "../../../domain/repositories/ISessionRepository";
+import { SessionRepository } from "../../../domain/repositories/SessionRepository";
 import { IStorageService } from "../../../domain/services/IStorageService";
 export class DeleteCourseUseCase {
 
   constructor(
     private courseRepo: CourseRepository,
-    private sessionRepo: ISessionRepository,
+    private sessionRepo: SessionRepository,
     private storageService: IStorageService
   ) {}
 
