@@ -5,6 +5,7 @@ import { SupabaseSessionRepository } from "../infrastructure/repositories/Supaba
 import { SupabaseCategoryRepository } from "../infrastructure/repositories/SupabaseCategoryRepository";
 import { SupabaseUserRepository } from "../infrastructure/repositories/SupabaseUserRepository";
 import { SupabaseTeacherRepository } from "../infrastructure/repositories/SupabaseTeacherRepository";
+import { SupabaseAnnouncementRepository } from "../infrastructure/repositories/SupabaseAnnouncementRepository";
 
 //  controllers
 import { CourseController } from "../interfaces/controllers/course.controller";
@@ -24,6 +25,12 @@ import { CreateCategoryUseCase } from "../application/usecases/category/CreateCa
 import { GetAllCategoriesUseCase } from "../application/usecases/category/GetAllCategories";
 import { UpdateCategoryUseCase } from "../application/usecases/category/UpdateCategory";
 import { DeleteCategoryUseCase } from "../application/usecases/category/DeleteCategory";
+
+import { CreateAnnouncementUseCase } from "../application/usecases/announcement/CreateAnnouncement";
+import { GetAllAnnouncementUseCase } from "../application/usecases/announcement/GetAllAnnouncement";
+import { UpdateAnnouncementUseCase } from "../application/usecases/announcement/UpdateAnnouncement";
+import { DeleteAnnouncementUseCase } from "../application/usecases/announcement/DeleteAnnouncement";
+import { IsActiveAnnouncementUseCase } from "../application/usecases/announcement/StatueActiveAnnouncement";
 
 import { CreateSessionUseCase } from "../application/usecases/session/CreateSession";
 import { GetAllSessionsUseCase } from "../application/usecases/session/GetAllSessions";
@@ -49,6 +56,7 @@ import { RemoveTeacherUseCase } from "../application/usecases/teacher/RemoveTeac
 import { VerifyTeacherUseCase } from "../application/usecases/teacher/VerifyTeacher";
 import { RequestForTeacherUseCase } from "../application/usecases/teacher/RequestForTeacher";
 import { GetAllTeachersUseCase } from "../application/usecases/teacher/GetAllTeachers";
+import { AnnouncementController } from "../interfaces/controllers/announcement.controller";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -57,7 +65,7 @@ const sessionRepo = new SupabaseSessionRepository();
 const categoryRepo = new SupabaseCategoryRepository();
 const userRepo = new SupabaseUserRepository();
 const teacherRepo = new SupabaseTeacherRepository();
-
+const announcementRepo = new SupabaseAnnouncementRepository();
 // services
 const storage = new SupabaseStorageService();
 const passwordService = new BcryptPasswordService();
@@ -77,6 +85,22 @@ const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo);
 const getAllCategoriesUseCase = new GetAllCategoriesUseCase(categoryRepo);
 const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepo);
 const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepo);
+
+const createAnnouncementUseCase = new CreateAnnouncementUseCase(
+  announcementRepo,
+);
+const getAllAnnouncementUseCase = new GetAllAnnouncementUseCase(
+  announcementRepo,
+);
+const updateAnnouncementUseCase = new UpdateAnnouncementUseCase(
+  announcementRepo,
+);
+const deleteAnnouncementUseCase = new DeleteAnnouncementUseCase(
+  announcementRepo,
+);
+const isActiveAnnouncementUseCase = new IsActiveAnnouncementUseCase(
+  announcementRepo,
+);
 
 const createSession = new CreateSessionUseCase(sessionRepo, storage);
 const getAllSessions = new GetAllSessionsUseCase(sessionRepo);
@@ -146,4 +170,12 @@ export const teacherController = new TeacherController(
   verifyTeacherUseCase,
   removeTeacherUseCase,
   getVerifiedTeachersUseCase,
+);
+
+export const announcementController = new AnnouncementController(
+  createAnnouncementUseCase,
+  getAllAnnouncementUseCase,
+  updateAnnouncementUseCase,
+  deleteAnnouncementUseCase,
+  isActiveAnnouncementUseCase,
 );

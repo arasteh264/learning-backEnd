@@ -3,9 +3,12 @@ import { UserRepository } from "../../domain/repositories/UserRepository";
 
 export class SupabaseUserRepository implements UserRepository {
   async findAll(): Promise<any[]> {
+  
+
     const { data } = await supabase
       .from("users")
-      .select("id, name, email, phone, role, created_at, user_name");
+      .select("id, name, email, phone, role, created_at, username");
+
 
     return data ?? [];
   }
