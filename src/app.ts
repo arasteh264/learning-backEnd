@@ -28,6 +28,7 @@ app.use("/v1/category", categoryRouter);
 app.use("/v1/course", courseRouter);
 app.use("/v1/teacher", teacherRouter);
 app.use("/v1/session", sessionRouter);
+
 app.use("/v1/ announcement", announcementRouter);
 
 export default app;
