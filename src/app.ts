@@ -10,6 +10,7 @@ import categoryRouter from "./main/routes/categoryRoutes";
 import courseRouter from "./main/routes/courseRoutes";
 import teacherRouter from "./main/routes/teacherRoutes";
 import sessionRouter from "./main/routes/sessionRoutes";
+import announcementRouter from "./main/routes/announcementRoutes";
 const app = express();
 
 app.use(cors());
@@ -27,4 +28,6 @@ app.use("/v1/category", categoryRouter);
 app.use("/v1/course", courseRouter);
 app.use("/v1/teacher", teacherRouter);
 app.use("/v1/session", sessionRouter);
+app.use("/v1/ announcement", announcementRouter);
+
 export default app;
