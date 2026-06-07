@@ -1,0 +1,45 @@
+export const CourseSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    name: { type: "string" },
+    description: { type: "string" },
+    support: { type: "string" },
+    href: { type: "string" },
+    price: { type: "integer" },
+    status: { type: "string" },
+    discount: { type: "integer" },
+    category: { type: "string" },
+    creator: { type: "string" },
+    cover: { type: "string", nullable: true },
+    sessionCount: { type: "integer" },
+  },
+};
+
+export const CourseMultipartSchema = {
+  type: "object",
+  required: [
+    "name",
+    "description",
+    "support",
+    "href",
+    "price",
+    "status",
+    "discount",
+    "category",
+    "creator",
+    "cover",
+  ],
+  properties: {
+    name: { type: "string" },
+    description: { type: "string" },
+    support: { type: "string" },
+    href: { type: "string" },
+    price: { type: "integer" },
+    status: { type: "string" },
+    discount: { type: "integer" },
+    category: { type: "string", format: "uuid" },
+    creator: { type: "string", format: "uuid" },
+    cover: { type: "string", format: "binary" },
+  },
+};

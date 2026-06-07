@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./config/swagger";
+import swaggerSpec from "./config/swagger/swagger";
 
 // routes
 import authRouter from "./main/routes/authRoutes";
@@ -11,6 +11,7 @@ import courseRouter from "./main/routes/courseRoutes";
 import teacherRouter from "./main/routes/teacherRoutes";
 import sessionRouter from "./main/routes/sessionRoutes";
 import announcementRouter from "./main/routes/announcementRoutes";
+
 const app = express();
 
 app.use(cors());
@@ -29,6 +30,6 @@ app.use("/v1/course", courseRouter);
 app.use("/v1/teacher", teacherRouter);
 app.use("/v1/session", sessionRouter);
 
-app.use("/v1/ announcement", announcementRouter);
+app.use("/v1/announcement", announcementRouter);
 
 export default app;

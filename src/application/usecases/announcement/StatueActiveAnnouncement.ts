@@ -1,15 +1,12 @@
+
 import { AnnouncementRepository } from "../../../domain/repositories/AnnouncementRepository";
 
 export class IsActiveAnnouncementUseCase {
-  constructor(private repo: AnnouncementRepository) {}
+  constructor(
+    private announcementRepository: AnnouncementRepository,
+  ) {}
 
-  async execute(id: string, data: any) {
-    const updated = await this.repo.update(id, data);
-
-    if (!updated) {
-      throw new Error("Announcement not found");
-    }
-
-    return updated;
+  async execute(id: string) {
+    return await this.announcementRepository.isActive(id);
   }
-}
+  }

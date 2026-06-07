@@ -7,14 +7,17 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(authMiddleware, isAdminMiddleware, announcementController.create)
-  .get(authMiddleware, isAdminMiddleware,announcementController.getAll);
+  .post(announcementController.create)
+  .get(announcementController.getAll);
 
 router
   .route("/:id")
-  .put(authMiddleware, isAdminMiddleware, announcementController.update)
-  .patch(authMiddleware, isAdminMiddleware, announcementController.isActive)
-  .delete(authMiddleware, isAdminMiddleware, announcementController.delete);
-  
+  .put(announcementController.update)
+  .delete(announcementController.delete);
+
+router.patch(
+  "/:id/status",
+  announcementController.isActive
+);
 
 export default router;
