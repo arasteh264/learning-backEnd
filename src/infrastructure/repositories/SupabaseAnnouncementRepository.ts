@@ -2,10 +2,11 @@ import supabase from "../../config/supabase";
 import { AnnouncementRepository } from "../../domain/repositories/AnnouncementRepository";
 
 export class SupabaseAnnouncementRepository implements AnnouncementRepository {
-
   async create(data: any) {
+    console.log("SupabaseAnnouncementRepository");
+    
     const { data: result, error } = await supabase
-      .from("Announcement")
+      .from("announcements")
       .insert([data])
       .select()
       .single();
@@ -15,9 +16,7 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
   }
 
   async findAll() {
-    const { data, error } = await supabase
-      .from("Announcement")
-      .select("*");
+    const { data, error } = await supabase.from("announcements").select("*");
 
     if (error) throw error;
     return data;
@@ -25,7 +24,7 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
 
   async update(id: string, data: any) {
     const { data: result, error } = await supabase
-      .from("Announcement")
+      .from("announcements")
       .update(data)
       .eq("id", id)
       .select()
@@ -37,7 +36,7 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
 
   async delete(id: string) {
     const { data, error } = await supabase
-      .from("Announcement")
+      .from("announcements")
       .delete()
       .eq("id", id)
       .select()
@@ -46,7 +45,22 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     if (error) throw error;
     return data;
   }
-  async isActive(id:string){
+async isActive(id: string) {
 
-  }
+  await supabase
+    .from("announcements")
+    .update({ isActive: false })
+    .eq("is_active", true);
+
+  const { data, error } = await supabase
+    .from("announcements")
+    .update({ isActive: true })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
 }

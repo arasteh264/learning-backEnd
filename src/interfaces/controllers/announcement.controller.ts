@@ -15,6 +15,8 @@ export class AnnouncementController {
   ) {}
 
   create = async (req: Request, res: Response) => {
+    console.log(req.body);
+    
     try {
       const result = await this.createUseCase.execute(req.body);
 
@@ -59,11 +61,20 @@ export class AnnouncementController {
       return res.status(500).json({ message: err.message });
     }
   };
-  isActive=async (req: Request, res: Response) => {
+  isActive = async (req: Request, res: Response) => {
     try {
-        
-    } catch (error) {
-        
+      const result = await this.isActiveUseCase.execute(
+        req.params.id as string,
+      );
+
+      return res.status(200).json({
+        message: "وضعیت بنر تغییر کرد",
+        Announcement: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: error.message,
+      });
     }
-  }
+  };
 }
