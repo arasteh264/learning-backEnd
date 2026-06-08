@@ -6,14 +6,14 @@ export const announcementPaths = {
     post: {
       tags: ["Announcements"],
       summary: "Create announcement",
-        requestBody: {
-              required: true,
-              content: {
-                "application/json": {
-                  schema: AnnouncementSchema,
-                },
-              },
-            },
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: AnnouncementSchema,
+          },
+        },
+      },
       responses: {
         201: {
           description: "Announcement created",
@@ -63,7 +63,34 @@ export const announcementPaths = {
       },
     },
   },
+  "/v1/announcement/active": {
+    get: {
+      tags: ["Announcements"],
+      summary: "Get active announcement",
+      description: "Returns the currently active announcement",
 
+      responses: {
+        200: {
+          description: "Active announcement",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/Announcement",
+              },
+            },
+          },
+        },
+
+        404: {
+          description: "No active announcement found",
+        },
+
+        500: {
+          description: "Server error",
+        },
+      },
+    },
+  },
   "/v1/announcement/{id}": {
     put: {
       tags: ["Announcements"],

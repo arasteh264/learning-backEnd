@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "dev": "nodemon --exec ts-node --files src/server.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "fastest-validator": "^1.19.1",
+    "jalali-moment": "^3.3.11",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
     "nodemailer": "^8.0.0",
@@ -36,6 +37,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3"
   }
 }

@@ -4,6 +4,7 @@ import { GetAllAnnouncementUseCase } from "../../application/usecases/announceme
 import { UpdateAnnouncementUseCase } from "../../application/usecases/announcement/UpdateAnnouncement";
 import { DeleteAnnouncementUseCase } from "../../application/usecases/announcement/DeleteAnnouncement";
 import { IsActiveAnnouncementUseCase } from "../../application/usecases/announcement/StatueActiveAnnouncement";
+import { GetActiveAnnouncementUseCase } from "../../application/usecases/announcement/GetActiveAnnouncement";
 
 export class AnnouncementController {
   constructor(
@@ -12,11 +13,12 @@ export class AnnouncementController {
     private updateUseCase: UpdateAnnouncementUseCase,
     private deleteUseCase: DeleteAnnouncementUseCase,
     private isActiveUseCase: IsActiveAnnouncementUseCase,
+    private getActiveUseCase: GetActiveAnnouncementUseCase,
   ) {}
 
   create = async (req: Request, res: Response) => {
     console.log(req.body);
-    
+
     try {
       const result = await this.createUseCase.execute(req.body);
 
@@ -31,6 +33,13 @@ export class AnnouncementController {
 
   getAll = async (_req: Request, res: Response) => {
     const result = await this.getAllUseCase.execute();
+
+    return res.status(200).json(result);
+  };
+
+  getActive = async (_req: Request, res: Response) => {
+    const result = await this.getActiveUseCase.execute();
+
     return res.status(200).json(result);
   };
 
