@@ -4,7 +4,7 @@ import { AnnouncementRepository } from "../../domain/repositories/AnnouncementRe
 export class SupabaseAnnouncementRepository implements AnnouncementRepository {
   async create(data: any) {
     console.log("SupabaseAnnouncementRepository");
-    
+
     const { data: result, error } = await supabase
       .from("announcements")
       .insert([data])
@@ -15,10 +15,17 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     return result;
   }
 
-  async findAll() {
-    const { data, error } = await supabase.from("announcements").select("*");
+  async findActive() {
+    const { data, error } = await supabase
+      .from("announcements")
+      .select("*")
+
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
 
     if (error) throw error;
+
     return data;
   }
 
@@ -33,7 +40,15 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     if (error) throw error;
     return result;
   }
+  async findAll() {
+    const { data, error } = await supabase
+      .from("announcements")
+      .select("*");
 
+    if (error) throw error;
+
+    return data;
+  }
   async delete(id: string) {
     const { data, error } = await supabase
       .from("announcements")
@@ -45,22 +60,21 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     if (error) throw error;
     return data;
   }
-async isActive(id: string) {
+  async isActive(id: string) {
+    await supabase
+      .from("announcements")
+      .update({ is_active: false })
+      .eq("is_active", true);
 
-  await supabase
-    .from("announcements")
-    .update({ isActive: false })
-    .eq("is_active", true);
+    const { data, error } = await supabase
+      .from("announcements")
+      .update({ is_active: true })
+      .eq("id", id)
+      .select()
+      .single();
 
-  const { data, error } = await supabase
-    .from("announcements")
-    .update({ isActive: true })
-    .eq("id", id)
-    .select()
-    .single();
+    if (error) throw error;
 
-  if (error) throw error;
-
-  return data;
-}
+    return data;
+  }
 }

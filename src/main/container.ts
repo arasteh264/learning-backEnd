@@ -14,6 +14,7 @@ import { SessionController } from "../interfaces/controllers/session.controller"
 import { CategoryController } from "../interfaces/controllers/category.controller";
 import { UserController } from "../interfaces/controllers/user.controller";
 import { TeacherController } from "../interfaces/controllers/teacher.controller";
+import { AnnouncementController } from "../interfaces/controllers/announcement.controller";
 
 // services
 import { BcryptPasswordService } from "../infrastructure/services/BcryptPasswordService";
@@ -31,6 +32,8 @@ import { GetAllAnnouncementUseCase } from "../application/usecases/announcement/
 import { UpdateAnnouncementUseCase } from "../application/usecases/announcement/UpdateAnnouncement";
 import { DeleteAnnouncementUseCase } from "../application/usecases/announcement/DeleteAnnouncement";
 import { IsActiveAnnouncementUseCase } from "../application/usecases/announcement/StatueActiveAnnouncement";
+import { GetActiveAnnouncementUseCase } from "../application/usecases/announcement/GetActiveAnnouncement";
+
 
 import { CreateSessionUseCase } from "../application/usecases/session/CreateSession";
 import { GetAllSessionsUseCase } from "../application/usecases/session/GetAllSessions";
@@ -56,7 +59,6 @@ import { RemoveTeacherUseCase } from "../application/usecases/teacher/RemoveTeac
 import { VerifyTeacherUseCase } from "../application/usecases/teacher/VerifyTeacher";
 import { RequestForTeacherUseCase } from "../application/usecases/teacher/RequestForTeacher";
 import { GetAllTeachersUseCase } from "../application/usecases/teacher/GetAllTeachers";
-import { AnnouncementController } from "../interfaces/controllers/announcement.controller";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -100,6 +102,9 @@ const deleteAnnouncementUseCase = new DeleteAnnouncementUseCase(
 );
 const isActiveAnnouncementUseCase = new IsActiveAnnouncementUseCase(
   announcementRepo,
+);
+const getActiveAnnouncementUseCase = new GetActiveAnnouncementUseCase(
+  announcementRepo
 );
 
 const createSession = new CreateSessionUseCase(sessionRepo, storage);
@@ -178,4 +183,5 @@ export const announcementController = new AnnouncementController(
   updateAnnouncementUseCase,
   deleteAnnouncementUseCase,
   isActiveAnnouncementUseCase,
+  getActiveAnnouncementUseCase,
 );

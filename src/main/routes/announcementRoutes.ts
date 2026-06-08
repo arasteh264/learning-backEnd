@@ -19,5 +19,6 @@ router.patch(
   "/:id/status",
   announcementController.isActive
 );
+router.get("/active", announcementController.getActive);
 
 export default router;
