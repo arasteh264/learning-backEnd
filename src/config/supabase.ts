@@ -6,6 +6,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseKey) {
   throw new Error("❌ Missing SUPABASE env variables");
 }
+console.log(supabaseUrl,                         supabaseKey);
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 

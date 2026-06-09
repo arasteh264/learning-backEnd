@@ -39,7 +39,6 @@ export class AnnouncementController {
 
   getActive = async (_req: Request, res: Response) => {
     const result = await this.getActiveUseCase.execute();
-
     return res.status(200).json(result);
   };
 
@@ -60,6 +59,8 @@ export class AnnouncementController {
   };
 
   delete = async (req: Request, res: Response) => {
+    console.log(req.params.id);
+    
     try {
       await this.deleteUseCase.execute(req.params.id as string);
 
@@ -70,20 +71,19 @@ export class AnnouncementController {
       return res.status(500).json({ message: err.message });
     }
   };
-  isActive = async (req: Request, res: Response) => {
-    try {
-      const result = await this.isActiveUseCase.execute(
-        req.params.id as string,
-      );
-
-      return res.status(200).json({
-        message: "وضعیت بنر تغییر کرد",
-        Announcement: result,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: error.message,
-      });
-    }
-  };
+isActive = async (req: Request, res: Response) => {
+  try {
+    const result = await this.isActiveUseCase.execute(req.params.id as string);
+    return res.status(200).json({
+      message: "وضعیت بنر تغییر کرد",
+      Announcement: result,
+    });
+  } catch (error: any) {
+    console.error("FULL ERROR:", JSON.stringify(error, null, 2)); // ← اضافه کن
+    return res.status(500).json({
+      message: error.message,
+      details: error, // ← اضافه کن
+    });
+  }
+};
 }

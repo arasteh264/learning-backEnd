@@ -1,8 +1,8 @@
 export interface Announcement {
   id: string;
   text: string;
-  endDate: string;
-  isActive: boolean;
+  end_date: string;
+  is_active: boolean;
 }
 
 export interface IAnnouncementRepository {
