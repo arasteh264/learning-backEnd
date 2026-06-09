@@ -2,18 +2,16 @@ import supabase from "../../config/supabase";
 import { AnnouncementRepository } from "../../domain/repositories/AnnouncementRepository";
 
 export class SupabaseAnnouncementRepository implements AnnouncementRepository {
-  async create(data: any) {
-    console.log("SupabaseAnnouncementRepository");
+async create(data: any) {
+  const { data: result, error } = await supabase
+    .from("announcements")
+    .insert([{ ...data, is_active: false }]) 
+    .select()
+    .single();
 
-    const { data: result, error } = await supabase
-      .from("announcements")
-      .insert([data])
-      .select()
-      .single();
-
-    if (error) throw error;
-    return result;
-  }
+  if (error) throw error;
+  return result;
+}
 
   async findActive() {
     const { data, error } = await supabase
@@ -41,9 +39,7 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     return result;
   }
   async findAll() {
-    const { data, error } = await supabase
-      .from("announcements")
-      .select("*");
+    const { data, error } = await supabase.from("announcements").select("*");
 
     if (error) throw error;
 
@@ -60,21 +56,17 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     if (error) throw error;
     return data;
   }
-  async isActive(id: string) {
-    await supabase
-      .from("announcements")
-      .update({ is_active: false })
-      .eq("is_active", true);
 
-    const { data, error } = await supabase
-      .from("announcements")
-      .update({ is_active: true })
-      .eq("id", id)
-      .select()
-      .single();
+  async isActive(id: any) {
+    console.log("isActive called with id:", id); // ← اضافه کن
+
+    const { data, error } = await supabase.rpc("set_active_announcement", {
+      announcement_id: Number(id),
+    });
+
+    console.log("rpc result:", data, "error:", error); // ← اضافه کن
 
     if (error) throw error;
-
     return data;
   }
 }
