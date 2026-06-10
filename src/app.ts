@@ -11,6 +11,7 @@ import courseRouter from "./main/routes/courseRoutes";
 import teacherRouter from "./main/routes/teacherRoutes";
 import sessionRouter from "./main/routes/sessionRoutes";
 import announcementRouter from "./main/routes/announcementRoutes";
+import sliderRouter from "./main/routes/sliderRoutes";
 
 const app = express();
 
@@ -31,5 +32,6 @@ app.use("/v1/teacher", teacherRouter);
 app.use("/v1/session", sessionRouter);
 
 app.use("/v1/announcement", announcementRouter);
+app.use("/v1/slider", sliderRouter);
 
 export default app;

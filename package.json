@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-      "kill": "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :3300') do taskkill /PID %a /F",
+    "kill": "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :3300') do taskkill /PID %a /F",
     "dev": "ts-node-dev --respawn --transpile-only --exit-child src/server.ts"
   },
   "author": "",
@@ -37,6 +37,7 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "nodemon": "^3.1.14",
+    "supabase": "^2.105.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3"

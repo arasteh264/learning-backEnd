@@ -5,4 +5,5 @@ export interface AnnouncementRepository {
   delete(id: string): Promise<any>;
   isActive(id: string): Promise<any>;
   findActive(): Promise<any[]>;
+   findById(id: string): Promise<any>;
 }

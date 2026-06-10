@@ -10,14 +10,13 @@ router
   .post(announcementController.create)
   .get(announcementController.getAll);
 
-// ✅ patch و get /active باید قبل از /:id باشن
 router.get("/active", announcementController.getActive);
 router.patch("/:id/status", announcementController.isActive);
 
-// /:id باید آخر باشه
 router
   .route("/:id")
   .put(announcementController.update)
-  .delete(announcementController.delete);
+  .delete(announcementController.delete)
+  .get(announcementController.findById);
 
 export default router;
