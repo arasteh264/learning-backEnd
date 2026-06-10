@@ -6,6 +6,8 @@ import { SupabaseCategoryRepository } from "../infrastructure/repositories/Supab
 import { SupabaseUserRepository } from "../infrastructure/repositories/SupabaseUserRepository";
 import { SupabaseTeacherRepository } from "../infrastructure/repositories/SupabaseTeacherRepository";
 import { SupabaseAnnouncementRepository } from "../infrastructure/repositories/SupabaseAnnouncementRepository";
+import { SupabaseSliderRepository } from "../infrastructure/repositories/SupabaseSliderRepository";
+
 
 //  controllers
 import { CourseController } from "../interfaces/controllers/course.controller";
@@ -15,6 +17,8 @@ import { CategoryController } from "../interfaces/controllers/category.controlle
 import { UserController } from "../interfaces/controllers/user.controller";
 import { TeacherController } from "../interfaces/controllers/teacher.controller";
 import { AnnouncementController } from "../interfaces/controllers/announcement.controller";
+import { SliderController } from "../interfaces/controllers/slider.controller";
+
 
 // services
 import { BcryptPasswordService } from "../infrastructure/services/BcryptPasswordService";
@@ -33,6 +37,7 @@ import { UpdateAnnouncementUseCase } from "../application/usecases/announcement/
 import { DeleteAnnouncementUseCase } from "../application/usecases/announcement/DeleteAnnouncement";
 import { IsActiveAnnouncementUseCase } from "../application/usecases/announcement/StatueActiveAnnouncement";
 import { GetActiveAnnouncementUseCase } from "../application/usecases/announcement/GetActiveAnnouncement";
+import { GetAnnouncementByIdUseCase } from "../application/usecases/announcement/GetAnnouncementByIdUseCase";
 
 
 import { CreateSessionUseCase } from "../application/usecases/session/CreateSession";
@@ -59,6 +64,11 @@ import { RemoveTeacherUseCase } from "../application/usecases/teacher/RemoveTeac
 import { VerifyTeacherUseCase } from "../application/usecases/teacher/VerifyTeacher";
 import { RequestForTeacherUseCase } from "../application/usecases/teacher/RequestForTeacher";
 import { GetAllTeachersUseCase } from "../application/usecases/teacher/GetAllTeachers";
+import { DeleteSliderUseCase } from "../application/usecases/slider/DeleteSlider";
+import { UpdateSliderUseCase } from "../application/usecases/slider/UpdateSlider";
+import { GetSliderByIdUseCase } from "../application/usecases/slider/GetSliderById";
+import { GetAllSlidersUseCase } from "../application/usecases/slider/GetAllSliders";
+import { CreateSliderUseCase } from "../application/usecases/slider/CreateSlider";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -68,6 +78,8 @@ const categoryRepo = new SupabaseCategoryRepository();
 const userRepo = new SupabaseUserRepository();
 const teacherRepo = new SupabaseTeacherRepository();
 const announcementRepo = new SupabaseAnnouncementRepository();
+const sliderRepo = new SupabaseSliderRepository();
+
 // services
 const storage = new SupabaseStorageService();
 const passwordService = new BcryptPasswordService();
@@ -106,6 +118,16 @@ const isActiveAnnouncementUseCase = new IsActiveAnnouncementUseCase(
 const getActiveAnnouncementUseCase = new GetActiveAnnouncementUseCase(
   announcementRepo
 );
+const getAnnouncementByIdUseCase  = new GetAnnouncementByIdUseCase (
+  announcementRepo
+);
+
+
+const createSliderUseCase = new CreateSliderUseCase(sliderRepo);
+const getAllSlidersUseCase = new GetAllSlidersUseCase(sliderRepo);
+const getSliderByIdUseCase = new GetSliderByIdUseCase(sliderRepo);
+const updateSliderUseCase = new UpdateSliderUseCase(sliderRepo);
+const deleteSliderUseCase = new DeleteSliderUseCase(sliderRepo);
 
 const createSession = new CreateSessionUseCase(sessionRepo, storage);
 const getAllSessions = new GetAllSessionsUseCase(sessionRepo);
@@ -184,4 +206,12 @@ export const announcementController = new AnnouncementController(
   deleteAnnouncementUseCase,
   isActiveAnnouncementUseCase,
   getActiveAnnouncementUseCase,
+  getAnnouncementByIdUseCase 
+);
+export const sliderController = new SliderController(
+  createSliderUseCase,
+  getAllSlidersUseCase,
+  getSliderByIdUseCase,
+  updateSliderUseCase,
+  deleteSliderUseCase,
 );

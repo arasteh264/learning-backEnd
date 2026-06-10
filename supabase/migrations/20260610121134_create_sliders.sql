@@ -1,0 +1,9 @@
+CREATE TABLE sliders (
+  id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  title TEXT NOT NULL,
+  link TEXT,
+  image_url TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  "order" INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

@@ -2,16 +2,16 @@ import supabase from "../../config/supabase";
 import { AnnouncementRepository } from "../../domain/repositories/AnnouncementRepository";
 
 export class SupabaseAnnouncementRepository implements AnnouncementRepository {
-async create(data: any) {
-  const { data: result, error } = await supabase
-    .from("announcements")
-    .insert([{ ...data, is_active: false }]) 
-    .select()
-    .single();
+  async create(data: any) {
+    const { data: result, error } = await supabase
+      .from("announcements")
+      .insert([{ is_active: false, ...data }])
+      .select()
+      .single();
 
-  if (error) throw error;
-  return result;
-}
+    if (error) throw error;
+    return result;
+  }
 
   async findActive() {
     const { data, error } = await supabase
@@ -38,13 +38,15 @@ async create(data: any) {
     if (error) throw error;
     return result;
   }
-  async findAll() {
-    const { data, error } = await supabase.from("announcements").select("*");
+async findAll() {
+  const { data, error } = await supabase
+    .from("announcements")
+    .select("*")
+    .order("is_active", { ascending: false }); 
 
-    if (error) throw error;
-
-    return data;
-  }
+  if (error) throw error;
+  return data;
+}
   async delete(id: string) {
     const { data, error } = await supabase
       .from("announcements")
@@ -58,13 +60,22 @@ async create(data: any) {
   }
 
   async isActive(id: any) {
-    console.log("isActive called with id:", id); // ← اضافه کن
 
     const { data, error } = await supabase.rpc("set_active_announcement", {
       announcement_id: Number(id),
     });
 
-    console.log("rpc result:", data, "error:", error); // ← اضافه کن
+    console.log("rpc result:", data, "error:", error);
+
+    if (error) throw error;
+    return data;
+  }
+  async findById(id: string) {
+    const { data, error } = await supabase
+      .from("announcements")
+      .select("*")
+      .eq("id", id)
+      .single();
 
     if (error) throw error;
     return data;
