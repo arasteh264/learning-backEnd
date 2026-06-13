@@ -8,7 +8,6 @@ import { SupabaseTeacherRepository } from "../infrastructure/repositories/Supaba
 import { SupabaseAnnouncementRepository } from "../infrastructure/repositories/SupabaseAnnouncementRepository";
 import { SupabaseSliderRepository } from "../infrastructure/repositories/SupabaseSliderRepository";
 
-
 //  controllers
 import { CourseController } from "../interfaces/controllers/course.controller";
 import { AuthController } from "../interfaces/controllers/auth.controller";
@@ -18,7 +17,6 @@ import { UserController } from "../interfaces/controllers/user.controller";
 import { TeacherController } from "../interfaces/controllers/teacher.controller";
 import { AnnouncementController } from "../interfaces/controllers/announcement.controller";
 import { SliderController } from "../interfaces/controllers/slider.controller";
-
 
 // services
 import { BcryptPasswordService } from "../infrastructure/services/BcryptPasswordService";
@@ -38,7 +36,6 @@ import { DeleteAnnouncementUseCase } from "../application/usecases/announcement/
 import { IsActiveAnnouncementUseCase } from "../application/usecases/announcement/StatueActiveAnnouncement";
 import { GetActiveAnnouncementUseCase } from "../application/usecases/announcement/GetActiveAnnouncement";
 import { GetAnnouncementByIdUseCase } from "../application/usecases/announcement/GetAnnouncementByIdUseCase";
-
 
 import { CreateSessionUseCase } from "../application/usecases/session/CreateSession";
 import { GetAllSessionsUseCase } from "../application/usecases/session/GetAllSessions";
@@ -69,6 +66,7 @@ import { UpdateSliderUseCase } from "../application/usecases/slider/UpdateSlider
 import { GetSliderByIdUseCase } from "../application/usecases/slider/GetSliderById";
 import { GetAllSlidersUseCase } from "../application/usecases/slider/GetAllSliders";
 import { CreateSliderUseCase } from "../application/usecases/slider/CreateSlider";
+import { SearchCourseUseCase } from "../application/usecases/course/SearchCourse";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -116,12 +114,11 @@ const isActiveAnnouncementUseCase = new IsActiveAnnouncementUseCase(
   announcementRepo,
 );
 const getActiveAnnouncementUseCase = new GetActiveAnnouncementUseCase(
-  announcementRepo
+  announcementRepo,
 );
-const getAnnouncementByIdUseCase  = new GetAnnouncementByIdUseCase (
-  announcementRepo
+const getAnnouncementByIdUseCase = new GetAnnouncementByIdUseCase(
+  announcementRepo,
 );
-
 
 const createSliderUseCase = new CreateSliderUseCase(sliderRepo);
 const getAllSlidersUseCase = new GetAllSlidersUseCase(sliderRepo);
@@ -149,6 +146,7 @@ const deleteCourseUseCase = new DeleteCourseUseCase(
   sessionRepo,
   storage,
 );
+const searchCourseUseCase = new SearchCourseUseCase(courseRepo);
 
 const createTeacherUseCase = new CreateTeacherUseCase(teacherRepo);
 const getVerifiedTeachersUseCase = new GetVerifiedTeachersUseCase(teacherRepo);
@@ -163,6 +161,7 @@ export const courseController = new CourseController(
   updateCourseUseCase,
   deleteCourseUseCase,
   getAllCoursesUseCase,
+  searchCourseUseCase,
 );
 
 export const categoryController = new CategoryController(
@@ -206,7 +205,7 @@ export const announcementController = new AnnouncementController(
   deleteAnnouncementUseCase,
   isActiveAnnouncementUseCase,
   getActiveAnnouncementUseCase,
-  getAnnouncementByIdUseCase 
+  getAnnouncementByIdUseCase,
 );
 export const sliderController = new SliderController(
   createSliderUseCase,

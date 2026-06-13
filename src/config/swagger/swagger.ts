@@ -17,6 +17,7 @@ import { UserSchema } from "./schemas/user.schema";
 import { AnnouncementSchema } from "./schemas/announcement.schema";
 import { SliderSchema } from "./schemas/slider.schema";
 import { sliderPaths } from "./paths/slider.paths";
+import { MessageResponse } from "./schemas/common.schema";
 
 
 const swaggerSpec = swaggerJsdoc({
@@ -46,6 +47,7 @@ const swaggerSpec = swaggerJsdoc({
     Announcement: AnnouncementSchema,
     AuthRegisterBody,
     AuthLoginBody,
+    MessageResponse,
   },
 },
 
