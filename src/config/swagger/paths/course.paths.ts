@@ -56,7 +56,42 @@ export const coursePaths = {
       },
     },
   },
-
+"/v1/course/search": {
+  get: {
+    tags: ["Courses"],
+    summary: "Search courses by name",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "q",
+        in: "query",
+        required: true,
+        description: "Search query",
+        schema: {
+          type: "string",
+        },
+      },
+    ],
+    responses: {
+      200: {
+        description: "Matched courses",
+        content: {
+          "application/json": {
+            schema: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/Course",
+              },
+            },
+          },
+        },
+      },
+      401: unauthorizedResponse,
+      403: forbiddenResponse,
+      500: serverErrorResponse,
+    },
+  },
+},
   "/v1/course/{id}": {
     get: {
       tags: ["Courses"],

@@ -63,4 +63,21 @@ export class SupabaseCourseRepository implements CourseRepository {
 
     if (error) throw error;
   }
+  async search(query: string) {
+    const words = query.split(/\s+/).filter(Boolean);
+
+    let q = supabase.from("courses").select(`
+    *,
+    teachers:creator_id ( id, bio, rating, user_id ),
+    categories:category_id ( id, title )
+  `);
+
+    words.forEach((word) => {
+      q = q.or(`name.ilike.%${word}%,description.ilike.%${word}%`);
+    });
+
+    const { data, error } = await q;
+    if (error) throw error;
+    return data;
+  }
 }

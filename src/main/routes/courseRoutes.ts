@@ -1,15 +1,17 @@
 import express from "express";
 import { courseController } from "../container";
+import upload from "../../middlewares/upload";
 
 const router = express.Router();
 
 router.post(
-  "/courses",
+  "/",
+  upload.single("cover"),
   courseController.createCourse
 );
 
 router.get(
-  "/courses",
+  "/",
   courseController.getAllCourses
 );
 
@@ -17,15 +19,15 @@ router.get(
 //   "/courses/:id",
 //   courseController.getCourse
 // );
-
+router.get("/search", courseController.searchCourse);
 router.put(
-  "/courses/:id",
+  "/:id",
   courseController.updateCourse
 );
 
 
 router.delete(
-  "/courses/:id",
+  "/:id",
   courseController.deleteCourse
 );
 
