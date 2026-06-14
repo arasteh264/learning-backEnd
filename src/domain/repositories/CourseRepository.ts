@@ -7,4 +7,5 @@ export interface CourseRepository {
   update(id: string, data: Partial<Course>): Promise<Course>;
   delete(id: string): Promise<void>;
   search(query: string): Promise<any[]>;
+  findLatest(limit?: number): Promise<any[]>;
 }

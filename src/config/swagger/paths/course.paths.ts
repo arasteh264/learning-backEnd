@@ -8,8 +8,39 @@ import {
 } from "../responses/common.responses";
 import { uuidParam } from "../base";
 
-
 export const coursePaths = {
+  "/v1/course/latest": {
+    get: {
+      tags: ["Courses"],
+      summary: "Get latest courses",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          description: "Number of courses to return (default 8)",
+          schema: { type: "integer", default: 8 },
+        },
+      ],
+      responses: {
+        200: {
+          description: "Latest courses",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: { $ref: "#/components/schemas/Course" },
+              },
+            },
+          },
+        },
+        401: unauthorizedResponse,
+        403: forbiddenResponse,
+        500: serverErrorResponse,
+      },
+    },
+  },
   "/v1/course": {
     get: {
       tags: ["Courses"],
@@ -56,50 +87,48 @@ export const coursePaths = {
       },
     },
   },
-"/v1/course/search": {
-  get: {
-    tags: ["Courses"],
-    summary: "Search courses by name",
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      {
-        name: "q",
-        in: "query",
-        required: true,
-        description: "Search query",
-        schema: {
-          type: "string",
+  "/v1/course/search": {
+    get: {
+      tags: ["Courses"],
+      summary: "Search courses by name",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "q",
+          in: "query",
+          required: true,
+          description: "Search query",
+          schema: {
+            type: "string",
+          },
         },
-      },
-    ],
-    responses: {
-      200: {
-        description: "Matched courses",
-        content: {
-          "application/json": {
-            schema: {
-              type: "array",
-              items: {
-                $ref: "#/components/schemas/Course",
+      ],
+      responses: {
+        200: {
+          description: "Matched courses",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: {
+                  $ref: "#/components/schemas/Course",
+                },
               },
             },
           },
         },
+        401: unauthorizedResponse,
+        403: forbiddenResponse,
+        500: serverErrorResponse,
       },
-      401: unauthorizedResponse,
-      403: forbiddenResponse,
-      500: serverErrorResponse,
     },
   },
-},
   "/v1/course/{id}": {
     get: {
       tags: ["Courses"],
       summary: "Get course detail",
       security: [{ bearerAuth: [] }],
-      parameters: [
-        uuidParam("id", "Course ID"),
-      ],
+      parameters: [uuidParam("id", "Course ID")],
       responses: {
         200: {
           description: "Course detail",
@@ -122,9 +151,7 @@ export const coursePaths = {
       tags: ["Courses"],
       summary: "Update a course",
       security: [{ bearerAuth: [] }],
-      parameters: [
-        uuidParam("id", "Course ID"),
-      ],
+      parameters: [uuidParam("id", "Course ID")],
       requestBody: {
         required: true,
         content: {
@@ -147,9 +174,7 @@ export const coursePaths = {
       tags: ["Courses"],
       summary: "Delete a course and its sessions",
       security: [{ bearerAuth: [] }],
-      parameters: [
-        uuidParam("id", "Course ID"),
-      ],
+      parameters: [uuidParam("id", "Course ID")],
       responses: {
         200: messageResponse,
         401: unauthorizedResponse,

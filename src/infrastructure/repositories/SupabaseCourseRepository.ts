@@ -80,4 +80,20 @@ export class SupabaseCourseRepository implements CourseRepository {
     if (error) throw error;
     return data;
   }
+  
+async findLatest(limit: number = 8) {
+  const { data, error } = await supabase
+    .from("courses")
+    .select(`
+      *,
+      teachers:creator_id ( id, bio, rating, user_id ),
+      categories:category_id ( id, title )
+    `)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data;
 }
+}
+

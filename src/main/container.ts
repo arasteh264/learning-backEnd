@@ -67,6 +67,14 @@ import { GetSliderByIdUseCase } from "../application/usecases/slider/GetSliderBy
 import { GetAllSlidersUseCase } from "../application/usecases/slider/GetAllSliders";
 import { CreateSliderUseCase } from "../application/usecases/slider/CreateSlider";
 import { SearchCourseUseCase } from "../application/usecases/course/SearchCourse";
+import { GetLatestCoursesUseCase } from "../application/usecases/course/GetLatestCourses";
+import { SupabaseArticleRepository } from "../infrastructure/repositories/SupabaseArticleRepository";
+import { DeleteArticleUseCase } from "../application/usecases/article/DeleteArticle";
+import { UpdateArticleUseCase } from "../application/usecases/article/UpdateArticle";
+import { GetArticleBySlugUseCase } from "../application/usecases/article/GetArticleBySlug";
+import { GetAllArticlesUseCase } from "../application/usecases/article/GetAllArticles";
+import { CreateArticleUseCase } from "../application/usecases/article/CreateArticle";
+import { ArticleController } from "../interfaces/controllers/article.controller";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -77,6 +85,7 @@ const userRepo = new SupabaseUserRepository();
 const teacherRepo = new SupabaseTeacherRepository();
 const announcementRepo = new SupabaseAnnouncementRepository();
 const sliderRepo = new SupabaseSliderRepository();
+const articleRepo = new SupabaseArticleRepository();
 
 // services
 const storage = new SupabaseStorageService();
@@ -138,8 +147,14 @@ const changeRoleUseCase = new ChangeRoleUseCase(userRepo);
 const updateUserUseCase = new UpdateUserUseCase(userRepo);
 const getProfileUseCase = new GetProfileUseCase(userRepo);
 
-const createCourseUseCase = new CreateCourseUseCase(courseRepo, storage);
-const updateCourseUseCase = new UpdateCourseUseCase(courseRepo, storage);
+const createArticleUseCase = new CreateArticleUseCase(articleRepo);
+const getAllArticlesUseCase = new GetAllArticlesUseCase(articleRepo);
+const getArticleBySlugUseCase = new GetArticleBySlugUseCase(articleRepo);
+const updateArticleUseCase = new UpdateArticleUseCase(articleRepo);
+const deleteArticleUseCase = new DeleteArticleUseCase(articleRepo);
+
+const createCourseUseCase = new CreateCourseUseCase(courseRepo);
+const updateCourseUseCase = new UpdateCourseUseCase(courseRepo);
 const getAllCoursesUseCase = new GetAllCoursesUseCase(courseRepo);
 const deleteCourseUseCase = new DeleteCourseUseCase(
   courseRepo,
@@ -147,6 +162,7 @@ const deleteCourseUseCase = new DeleteCourseUseCase(
   storage,
 );
 const searchCourseUseCase = new SearchCourseUseCase(courseRepo);
+const getLatestCoursesUseCase = new GetLatestCoursesUseCase(courseRepo);
 
 const createTeacherUseCase = new CreateTeacherUseCase(teacherRepo);
 const getVerifiedTeachersUseCase = new GetVerifiedTeachersUseCase(teacherRepo);
@@ -162,6 +178,7 @@ export const courseController = new CourseController(
   deleteCourseUseCase,
   getAllCoursesUseCase,
   searchCourseUseCase,
+getLatestCoursesUseCase,
 );
 
 export const categoryController = new CategoryController(
@@ -213,4 +230,11 @@ export const sliderController = new SliderController(
   getSliderByIdUseCase,
   updateSliderUseCase,
   deleteSliderUseCase,
+);
+export const articleController = new ArticleController(
+  createArticleUseCase,
+  getAllArticlesUseCase,
+  getArticleBySlugUseCase,
+  updateArticleUseCase,
+  deleteArticleUseCase
 );
