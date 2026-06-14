@@ -1,27 +1,26 @@
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
-import { Course } from "../../../domain/entities/Course";
-import { IStorageService } from "../../../domain/services/IStorageService";
 
 export class CreateCourseUseCase {
-  constructor(
-    private courseRepo: CourseRepository,
-    private storageService: IStorageService
-  ) {}
+  constructor(private courseRepo: CourseRepository) {}
 
-  async execute(data: Partial<Course>, file?: Express.Multer.File) {
-    if (!file) {
+  async execute(data: any) {
+    if (!data.cover) {
       throw new Error("Cover is required");
     }
 
-    const uploaded = await this.storageService.upload(
-      file,
-      "images",
-      "courses"
-    );
+    const insertData = {
+      name: data.name,
+      description: data.description,
+      support: data.support,
+      href: data.href,
+      price: data.price,
+      status: data.status,
+      discount: data.discount,
+      category_id: data.category,
+      creator_id: data.creator,
+      cover: data.cover,
+    };
 
-    return await this.courseRepo.create({
-      ...data,
-      cover: uploaded.url,
-    });
+    return await this.courseRepo.create(insertData);
   }
 }

@@ -18,6 +18,8 @@ import { AnnouncementSchema } from "./schemas/announcement.schema";
 import { SliderSchema } from "./schemas/slider.schema";
 import { sliderPaths } from "./paths/slider.paths";
 import { MessageResponse } from "./schemas/common.schema";
+import { ArticleSchema } from "./schemas/article.schema";
+import { articlePaths } from "./paths/article.paths";
 
 
 const swaggerSpec = swaggerJsdoc({
@@ -33,6 +35,7 @@ const swaggerSpec = swaggerJsdoc({
       { name: "Categories" },
       { name: "Announcement" },
       { name: "Slider" },
+      { name: "Articles" },
     ],
 
    components: {
@@ -45,6 +48,7 @@ const swaggerSpec = swaggerJsdoc({
     User:UserSchema,
     Slider: SliderSchema,
     Announcement: AnnouncementSchema,
+    Article: ArticleSchema,
     AuthRegisterBody,
     AuthLoginBody,
     MessageResponse,
@@ -59,6 +63,7 @@ const swaggerSpec = swaggerJsdoc({
       ...teacherPaths,
       ...announcementPaths,
       ...sliderPaths,
+      ...articlePaths,
     },
   },
   apis: [],

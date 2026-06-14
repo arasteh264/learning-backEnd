@@ -1,21 +1,10 @@
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
-import { IStorageService } from "../../../domain/services/IStorageService";
 
 export class UpdateCourseUseCase {
+  constructor(private courseRepo: CourseRepository) {}
 
-  constructor(
-    private courseRepo: CourseRepository,
-    private storage: IStorageService
-  ) {}
-
-  async execute(
-    id: string,
-    body: any,
-    file?: Express.Multer.File
-  ) {
-
-    const existingCourse =
-      await this.courseRepo.findById(id);
+  async execute(id: string, body: any) {
+    const existingCourse = await this.courseRepo.findById(id);
 
     if (!existingCourse) {
       throw new Error("دوره یافت نشد");
@@ -33,23 +22,8 @@ export class UpdateCourseUseCase {
       creator_id: body.creator,
     };
 
-    if (file) {
-
-      if (existingCourse.cover) {
-        await this.storage.delete(
-          existingCourse.cover,
-          "images"
-        );
-      }
-
-      const uploaded =
-        await this.storage.upload(
-          file,
-          "images",
-          "courses"
-        );
-
-      updateData.cover = uploaded.url;
+    if (body.cover) {
+      updateData.cover = body.cover;
     }
 
     return this.courseRepo.update(id, updateData);
