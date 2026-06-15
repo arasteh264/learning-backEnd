@@ -63,10 +63,12 @@ export class ArticleController {
     }
   };
 
-  getArticleBySlug = async (req: Request, res: Response) => {
+  getArticleById = async (req: Request, res: Response) => {
     try {
+      console.log(req.params.id);
+      
       const article = await this.getArticleBySlugUseCase.execute(
-        req.params.slug as string
+        req.params.id as string
       );
       return res.status(200).json(article);
     } catch (err: any) {

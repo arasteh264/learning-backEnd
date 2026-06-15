@@ -3,8 +3,8 @@ import { ArticleRepository } from "../../../domain/repositories/ArticleRepositor
 export class GetArticleBySlugUseCase {
   constructor(private articleRepo: ArticleRepository) {}
 
-  async execute(slug: string) {
-    const article = await this.articleRepo.findBySlug(slug);
+  async execute(id: string) {
+    const article = await this.articleRepo.findById(id);
 
     if (!article) {
       throw new Error("مقاله یافت نشد");

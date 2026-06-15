@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/", upload.single("cover"), articleController.createArticle);
 router.get("/", articleController.getAllArticles);
-router.get("/:slug", articleController.getArticleBySlug);
+router.get("/:id", articleController.getArticleById);
 router.put("/:id", upload.single("cover"), articleController.updateArticle);
 router.delete("/:id", articleController.deleteArticle);
 
