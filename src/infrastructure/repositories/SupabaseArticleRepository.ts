@@ -61,6 +61,7 @@ export class SupabaseArticleRepository implements ArticleRepository {
   }
 
   async update(id: string, data: any) {
+    console.log(id)
     const { data: result, error } = await supabase
       .from("articles")
       .update({ ...data, updated_at: new Date().toISOString() })

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CreateArticleUseCase } from "../../application/usecases/article/CreateArticle";
 import { GetAllArticlesUseCase } from "../../application/usecases/article/GetAllArticles";
-import { GetArticleBySlugUseCase } from "../../application/usecases/article/GetArticleBySlug";
+import { GetArticleBySlugUseCase as GetArticleByIdUseCase } from "../../application/usecases/article/GetArticleBySlug";
 import { UpdateArticleUseCase } from "../../application/usecases/article/UpdateArticle";
 import { DeleteArticleUseCase } from "../../application/usecases/article/DeleteArticle";
 import { uploadFile } from "../../config/uploadSupabase";
@@ -25,9 +25,10 @@ export class ArticleController {
   constructor(
     private createArticleUseCase: CreateArticleUseCase,
     private getAllArticlesUseCase: GetAllArticlesUseCase,
-    private getArticleBySlugUseCase: GetArticleBySlugUseCase,
+    private getArticleBySlugUseCase: GetArticleByIdUseCase,
     private updateArticleUseCase: UpdateArticleUseCase,
-    private deleteArticleUseCase: DeleteArticleUseCase
+    private deleteArticleUseCase: DeleteArticleUseCase,
+    private getArticleByIdUseCase: GetArticleByIdUseCase
   ) {}
 
   createArticle = async (req: MulterRequest, res: Response) => {
@@ -65,9 +66,9 @@ export class ArticleController {
 
   getArticleById = async (req: Request, res: Response) => {
     try {
-      console.log(req.params.id);
       
-      const article = await this.getArticleBySlugUseCase.execute(
+      
+      const article = await this.getArticleByIdUseCase.execute(
         req.params.id as string
       );
       return res.status(200).json(article);
