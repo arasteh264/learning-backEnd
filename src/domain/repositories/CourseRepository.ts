@@ -8,4 +8,5 @@ export interface CourseRepository {
   delete(id: string): Promise<void>;
   search(query: string): Promise<any[]>;
   findLatest(limit?: number): Promise<any[]>;
+  findPopularFree(limit?: number): Promise<any[]>;
 }

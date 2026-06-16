@@ -95,5 +95,26 @@ async findLatest(limit: number = 8) {
   if (error) throw error;
   return data;
 }
+
+
+
+async findPopularFree(limit: number = 8) {
+  const { data, error } = await supabase
+    .from("courses")
+    .select(`
+      *,
+      teachers:creator_id ( id, bio, rating, user_id ),
+      categories:category_id ( id, title )
+    `)
+    .eq("price", 0)
+    .order("views", { ascending: false })
+    .order("enrolled_count", { ascending: false })
+    .order("rating", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data;
+}
+
 }
 

@@ -75,6 +75,7 @@ import { GetArticleBySlugUseCase } from "../application/usecases/article/GetArti
 import { GetAllArticlesUseCase } from "../application/usecases/article/GetAllArticles";
 import { CreateArticleUseCase } from "../application/usecases/article/CreateArticle";
 import { ArticleController } from "../interfaces/controllers/article.controller";
+import { GetPopularFreeCoursesUseCase } from "../application/usecases/course/GetPopularFreeCourses";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -163,6 +164,7 @@ const deleteCourseUseCase = new DeleteCourseUseCase(
 );
 const searchCourseUseCase = new SearchCourseUseCase(courseRepo);
 const getLatestCoursesUseCase = new GetLatestCoursesUseCase(courseRepo);
+const getPopularFreeCoursesUseCase = new GetPopularFreeCoursesUseCase(courseRepo);
 
 const createTeacherUseCase = new CreateTeacherUseCase(teacherRepo);
 const getVerifiedTeachersUseCase = new GetVerifiedTeachersUseCase(teacherRepo);
@@ -179,6 +181,7 @@ export const courseController = new CourseController(
   getAllCoursesUseCase,
   searchCourseUseCase,
 getLatestCoursesUseCase,
+getPopularFreeCoursesUseCase,
 );
 
 export const categoryController = new CategoryController(
