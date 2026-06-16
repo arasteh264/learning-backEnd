@@ -26,7 +26,7 @@ router.put(
   courseController.updateCourse
 );
 
-
+router.get("/free/popular", courseController.getPopularFreeCourses);
 router.delete(
   "/:id",
   courseController.deleteCourse

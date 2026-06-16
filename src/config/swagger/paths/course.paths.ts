@@ -184,4 +184,32 @@ export const coursePaths = {
       },
     },
   },
+  "/v1/course/free/popular": {
+  get: {
+    tags: ["Courses"],
+    summary: "Get popular free courses",
+    parameters: [
+      {
+        name: "limit",
+        in: "query",
+        required: false,
+        schema: { type: "integer", default: 8 },
+      },
+    ],
+    responses: {
+      200: {
+        description: "Popular free courses",
+        content: {
+          "application/json": {
+            schema: {
+              type: "array",
+              items: { $ref: "#/components/schemas/Course" },
+            },
+          },
+        },
+      },
+      500: serverErrorResponse,
+    },
+  },
+},
 };

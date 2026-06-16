@@ -6,6 +6,7 @@ import { GetAllCoursesUseCase } from "../../application/usecases/course/GetAllCo
 import { SearchCourseUseCase } from "../../application/usecases/course/SearchCourse";
 import { uploadFile } from "../../config/uploadSupabase";
 import { GetLatestCoursesUseCase } from "../../application/usecases/course/GetLatestCourses";
+import { GetPopularFreeCoursesUseCase } from "../../application/usecases/course/GetPopularFreeCourses";
 type MulterRequest = Request & {
   file?: {
     fieldname: string;
@@ -27,6 +28,7 @@ export class CourseController {
     private getAllCoursesUseCase: GetAllCoursesUseCase,
     private searchCourseUseCase: SearchCourseUseCase,
     private getLatestCoursesUseCase: GetLatestCoursesUseCase,
+    private getPopularFreeCoursesUseCase: GetPopularFreeCoursesUseCase,
   ) {}
 
   updateCourse = async (req: MulterRequest, res: Response) => {
@@ -122,4 +124,14 @@ createCourse = async (req: MulterRequest, res: Response) => {
       });
     }
   };
+
+  getPopularFreeCourses = async (req: Request, res: Response) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : 8;
+    const courses = await this.getPopularFreeCoursesUseCase.execute(limit);
+    return res.status(200).json(courses);
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+};
 }
