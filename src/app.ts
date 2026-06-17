@@ -13,6 +13,7 @@ import sessionRouter from "./main/routes/sessionRoutes";
 import announcementRouter from "./main/routes/announcementRoutes";
 import sliderRouter from "./main/routes/sliderRoutes";
 import articleRouter from "./main/routes/articleRoutes";
+import cartRoutes from "./main/routes/cartRoutes";
 const app = express();
 
 app.use(cors());
@@ -32,5 +33,5 @@ app.use("/v1/session", sessionRouter);
 app.use("/v1/announcement", announcementRouter);
 app.use("/v1/slider", sliderRouter);
 app.use("/v1/article", articleRouter);
-
+app.use("/v1/cart", cartRoutes);
 export default app;
