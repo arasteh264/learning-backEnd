@@ -76,6 +76,10 @@ import { GetAllArticlesUseCase } from "../application/usecases/article/GetAllArt
 import { CreateArticleUseCase } from "../application/usecases/article/CreateArticle";
 import { ArticleController } from "../interfaces/controllers/article.controller";
 import { GetPopularFreeCoursesUseCase } from "../application/usecases/course/GetPopularFreeCourses";
+import { SupabaseCartRepository } from "../infrastructure/repositories/SupabaseCartRepository";
+import { GetCartUseCase } from "../application/usecases/cart/GetCart";
+import { AddToCartUseCase } from "../application/usecases/cart/AddToCart";
+import { RemoveFromCartUseCase } from "../application/usecases/cart/RemoveFromCart";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -87,6 +91,7 @@ const teacherRepo = new SupabaseTeacherRepository();
 const announcementRepo = new SupabaseAnnouncementRepository();
 const sliderRepo = new SupabaseSliderRepository();
 const articleRepo = new SupabaseArticleRepository();
+const cartRepo = new SupabaseCartRepository();
 
 // services
 const storage = new SupabaseStorageService();
@@ -172,6 +177,10 @@ const removeTeacherUseCase = new RemoveTeacherUseCase(teacherRepo);
 const verifyTeacherUseCase = new VerifyTeacherUseCase(teacherRepo);
 const requestForTeacherUseCase = new RequestForTeacherUseCase(teacherRepo);
 const getAllTeachersUseCase = new GetAllTeachersUseCase(teacherRepo);
+
+const getCartUseCase = new GetCartUseCase(cartRepo);
+const addToCartUseCase = new AddToCartUseCase(cartRepo, courseRepo);
+const removeFromCartUseCase = new RemoveFromCartUseCase(cartRepo);
 
 // controllers
 export const courseController = new CourseController(
