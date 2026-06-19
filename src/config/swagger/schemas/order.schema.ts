@@ -20,8 +20,8 @@ export const OrderSchema = {
   type: "object",
   properties: {
     id: { type: "string", format: "uuid" },
-    user_id: { type: "string", format: "uuid" },
-    total_price: { type: "integer" },
+    userId: { type: "string", format: "uuid" },
+    totalprice: { type: "integer" },
     status: {
       type: "string",
       enum: ["pending", "awaiting_payment", "paid", "failed", "cancelled"],

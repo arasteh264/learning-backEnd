@@ -5,14 +5,14 @@ export class SupabaseOrderRepository implements OrderRepository {
   async createOrder(
     userId: string,
     items: { courseId: string; price: number }[],
-    totalPrice: number
+    total_price: number,
   ) {
     // قدم ۱: خود سفارش رو می‌سازیم
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: userId,
-        total_price: totalPrice,
+        total_price: total_price,
         status: "pending",
       })
       .select()
@@ -39,7 +39,8 @@ export class SupabaseOrderRepository implements OrderRepository {
   async findById(id: string) {
     const { data, error } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           id,
@@ -47,7 +48,8 @@ export class SupabaseOrderRepository implements OrderRepository {
           price,
           courses:course_id ( id, name, cover, href )
         )
-      `)
+      `,
+      )
       .eq("id", id)
       .single();
 
@@ -58,7 +60,8 @@ export class SupabaseOrderRepository implements OrderRepository {
   async findByUser(userId: string) {
     const { data, error } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         *,
         order_items (
           id,
@@ -66,7 +69,8 @@ export class SupabaseOrderRepository implements OrderRepository {
           price,
           courses:course_id ( id, name, cover, href )
         )
-      `)
+      `,
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
