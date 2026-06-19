@@ -80,6 +80,16 @@ import { SupabaseCartRepository } from "../infrastructure/repositories/SupabaseC
 import { GetCartUseCase } from "../application/usecases/cart/GetCart";
 import { AddToCartUseCase } from "../application/usecases/cart/AddToCart";
 import { RemoveFromCartUseCase } from "../application/usecases/cart/RemoveFromCart";
+import { SupabaseOrderRepository } from "../infrastructure/repositories/SupabaseOrderRepository";
+import { SupabaseTransactionRepository } from "../infrastructure/repositories/SupabaseTransactionRepository";
+import { SupabaseEnrollmentRepository } from "../infrastructure/repositories/SupabaseEnrollmentRepository";
+import { ZarinpalGateway } from "../infrastructure/services/ZarinpalGateway";
+import { CreateOrderUseCase } from "../application/usecases/Order/CreateOrderUseCase";
+import { RequestPaymentUseCase } from "../application/usecases/payment/RequestPaymentUseCase";
+import { VerifyPaymentUseCase } from "../application/usecases/payment/VerifyPaymentUseCase";
+import { OrderController } from "../interfaces/controllers/order.controller";
+import { PaymentController } from "../interfaces/controllers/payment.controller";
+import { CartController } from "../interfaces/controllers/cart.controller";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -92,6 +102,10 @@ const announcementRepo = new SupabaseAnnouncementRepository();
 const sliderRepo = new SupabaseSliderRepository();
 const articleRepo = new SupabaseArticleRepository();
 const cartRepo = new SupabaseCartRepository();
+const orderRepo = new SupabaseOrderRepository();
+const transactionRepo = new SupabaseTransactionRepository();
+const enrollmentRepo = new SupabaseEnrollmentRepository();
+const paymentGateway = new ZarinpalGateway();
 
 // services
 const storage = new SupabaseStorageService();
@@ -107,6 +121,10 @@ const registerUseCase = new RegisterUseCase(
   passwordService,
   tokenService,
 );
+
+const createOrderUseCase = new CreateOrderUseCase(cartRepo, orderRepo);
+const requestPaymentUseCase = new RequestPaymentUseCase(orderRepo, transactionRepo, paymentGateway);
+const verifyPaymentUseCase = new VerifyPaymentUseCase(orderRepo, transactionRepo, enrollmentRepo, paymentGateway);
 
 const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo);
 const getAllCategoriesUseCase = new GetAllCategoriesUseCase(categoryRepo);
@@ -244,9 +262,19 @@ export const sliderController = new SliderController(
   deleteSliderUseCase,
 );
 export const articleController = new ArticleController(
+
   createArticleUseCase,
   getAllArticlesUseCase,
   getArticleBySlugUseCase,
   updateArticleUseCase,
-  deleteArticleUseCase
+  deleteArticleUseCase,
+  getArticleBySlugUseCase
+
 );
+export const cartController = new CartController(
+  getCartUseCase,
+  addToCartUseCase,
+  removeFromCartUseCase,
+);
+export const orderController = new OrderController(createOrderUseCase);
+export const paymentController = new PaymentController(requestPaymentUseCase, verifyPaymentUseCase);
