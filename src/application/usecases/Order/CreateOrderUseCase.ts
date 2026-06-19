@@ -17,23 +17,23 @@ export class CreateOrderUseCase {
       throw new Error("سبد خرید شما خالی است");
     }
     console.log("Creating order...", cart.cart_items);
-   const items = cart.cart_items.map((item: any) => {
-  const course = item?.courses;
+    const items = cart.cart_items.map((item: any) => {
+      const course = item?.courses;
 
-  const price = Number(course?.price ?? 0);
-  const discount = Number(course?.discount ?? 0);
+      const price = Number(course?.price ?? 0);
+      const discount = Number(course?.discount ?? 0);
 
-  const finalPrice =
-    discount > 0 ? Math.round(price - (price * discount) / 100) : price;
+      const finalPrice =
+        discount > 0 ? Math.round(price - (price * discount) / 100) : price;
 
-  return { courseId: course?.id, price: finalPrice };
-});
-    const totalPrice = items.reduce((sum: number, item: Item) => {
+      return { courseId: course?.id, price: finalPrice };
+    });
+    const totalprice = items.reduce((sum: number, item: Item) => {
       return sum + item.price;
     }, 0);
-    console.log("Total price:", totalPrice);
+    console.log("Total price:", totalprice);
 
-    const order = await this.orderRepo.createOrder(userId, items, totalPrice);
+    const order = await this.orderRepo.createOrder(userId, items, totalprice);
 
     await this.cartRepo.clearCart(cart.id);
 
