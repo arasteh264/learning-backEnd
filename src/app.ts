@@ -14,6 +14,8 @@ import announcementRouter from "./main/routes/announcementRoutes";
 import sliderRouter from "./main/routes/sliderRoutes";
 import articleRouter from "./main/routes/articleRoutes";
 import cartRoutes from "./main/routes/cartRoutes";
+import orderRouter from "./main/routes/orderRoutes";
+import paymentRouter from "./main/routes/paymentRoutes";
 const app = express();
 
 app.use(cors());
@@ -34,4 +36,6 @@ app.use("/v1/announcement", announcementRouter);
 app.use("/v1/slider", sliderRouter);
 app.use("/v1/article", articleRouter);
 app.use("/v1/cart", cartRoutes);
+app.use("/v1/order", orderRouter);
+app.use("/v1/payment", paymentRouter);
 export default app;

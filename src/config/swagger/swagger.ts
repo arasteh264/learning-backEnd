@@ -20,7 +20,12 @@ import { sliderPaths } from "./paths/slider.paths";
 import { MessageResponse } from "./schemas/common.schema";
 import { ArticleSchema } from "./schemas/article.schema";
 import { articlePaths } from "./paths/article.paths";
-
+import { OrderItemSchema, OrderSchema } from "./schemas/order.schema";
+import { RequestPaymentBody, RequestPaymentResponse } from "./schemas/payment.schema";
+import { orderPaths } from "./paths/order.paths";
+import { paymentPaths } from "./paths/payment.paths";
+import { cartPaths } from "./paths/cart.paths";
+import { AddToCartBody, CartItemSchema, CartSchema } from "./schemas/cart.schema";
 
 const swaggerSpec = swaggerJsdoc({
   definition: {
@@ -36,24 +41,34 @@ const swaggerSpec = swaggerJsdoc({
       { name: "Announcement" },
       { name: "Slider" },
       { name: "Articles" },
+      { name: "Orders" },
+      { name: "Payment" },
+      { name: "Cart" }, 
     ],
 
-   components: {
-  ...baseSwagger.components,
-  schemas: {
-    Category: CategorySchema,
-    Course: CourseSchema,
-    Session: SessionSchema,
-    Teacher: TeacherSchema,
-    User:UserSchema,
-    Slider: SliderSchema,
-    Announcement: AnnouncementSchema,
-    Article: ArticleSchema,
-    AuthRegisterBody,
-    AuthLoginBody,
-    MessageResponse,
-  },
-},
+    components: {
+      ...baseSwagger.components,
+      schemas: {
+        Category: CategorySchema,
+        Course: CourseSchema,
+        Session: SessionSchema,
+        Teacher: TeacherSchema,
+        User: UserSchema,
+        Slider: SliderSchema,
+        Announcement: AnnouncementSchema,
+        Article: ArticleSchema,
+        Order: OrderSchema, 
+        OrderItem: OrderItemSchema, 
+        RequestPaymentBody, 
+        RequestPaymentResponse,
+        Cart: CartSchema,           
+        CartItem: CartItemSchema,  
+        AddToCartBody,   
+        AuthRegisterBody,
+        AuthLoginBody,
+        MessageResponse,
+      },
+    },
 
     paths: {
       ...authPaths,
@@ -64,6 +79,9 @@ const swaggerSpec = swaggerJsdoc({
       ...announcementPaths,
       ...sliderPaths,
       ...articlePaths,
+       ...orderPaths,   
+      ...paymentPaths, 
+       ...cartPaths,
     },
   },
   apis: [],
