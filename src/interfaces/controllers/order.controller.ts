@@ -6,7 +6,6 @@ export class OrderController {
 
   createOrder = async (req: Request, res: Response) => {
     try {
-      console.log("Creating order...");
       
       const userId = (req as any).user.id;
       const order = await this.createOrderUseCase.execute(userId);

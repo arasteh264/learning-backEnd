@@ -2,7 +2,7 @@ export interface OrderRepository {
   createOrder(
     userId: string,
     items: { courseId: string; price: number }[],
-    total_price: number,
+    totalprice: number,
   ): Promise<any>;
 
   findById(id: string): Promise<any | null>;

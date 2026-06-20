@@ -5,14 +5,14 @@ export class SupabaseOrderRepository implements OrderRepository {
   async createOrder(
     userId: string,
     items: { courseId: string; price: number }[],
-    total_price: number,
+    totalprice: number,
   ) {
     // قدم ۱: خود سفارش رو می‌سازیم
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: userId,
-        total_price: total_price,
+        totalprice: totalprice,
         status: "pending",
       })
       .select()

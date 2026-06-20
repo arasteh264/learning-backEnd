@@ -34,7 +34,6 @@ export class PaymentController {
     }
   };
 
-  // این متد callback از زرین‌پال هست - کاربر مستقیماً به اینجا redirect می‌شه
   verifyPayment = async (req: Request, res: Response) => {
     try {
       const authority = req.query.Authority as string;
