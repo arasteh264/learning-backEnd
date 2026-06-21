@@ -8,4 +8,5 @@ export interface OrderRepository {
   findById(id: string): Promise<any | null>;
   findByUser(userId: string): Promise<any[]>;
   updateStatus(id: string, status: string): Promise<any>;
+  findAll(): Promise<any[]>;
 }

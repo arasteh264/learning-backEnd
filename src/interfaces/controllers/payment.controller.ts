@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { RequestPaymentUseCase } from "../../application/usecases/payment/RequestPaymentUseCase";
 import { VerifyPaymentUseCase } from "../../application/usecases/payment/VerifyPaymentUseCase";
+import { GetAllTransactionsUseCase } from "../../application/usecases/payment/GetAllTransactions";
 
 
 export class PaymentController {
   constructor(
     private requestPaymentUseCase: RequestPaymentUseCase,
-    private verifyPaymentUseCase: VerifyPaymentUseCase
+    private verifyPaymentUseCase: VerifyPaymentUseCase,
+    private getAllTransactionsUseCase: GetAllTransactionsUseCase,
   ) {}
 
   requestPayment = async (req: Request, res: Response) => {
@@ -55,6 +57,14 @@ export class PaymentController {
     } catch (err: any) {
       const frontendUrl = process.env.FRONTEND_URL;
       return res.redirect(`${frontendUrl}/payment/failed`);
+    }
+  };
+   getAllTransactions = async (req: Request, res: Response) => {
+    try {
+      const transactions = await this.getAllTransactionsUseCase.execute();
+      return res.status(200).json(transactions);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
     }
   };
 }

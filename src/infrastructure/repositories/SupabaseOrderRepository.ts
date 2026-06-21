@@ -7,7 +7,6 @@ export class SupabaseOrderRepository implements OrderRepository {
     items: { courseId: string; price: number }[],
     totalprice: number,
   ) {
-    // قدم ۱: خود سفارش رو می‌سازیم
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -20,7 +19,6 @@ export class SupabaseOrderRepository implements OrderRepository {
 
     if (orderError) throw orderError;
 
-    // قدم ۲: آیتم‌های سفارش رو می‌سازیم (هر دوره با قیمتش)
     const orderItems = items.map((item) => ({
       order_id: order.id,
       course_id: item.courseId,
@@ -89,4 +87,24 @@ export class SupabaseOrderRepository implements OrderRepository {
     if (error) throw error;
     return data;
   }
+async findAll() {
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `
+      *,
+      user:user_id (
+        id,
+        name
+      )
+    `,
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
 }

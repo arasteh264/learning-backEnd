@@ -7,5 +7,6 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.post("/", orderController.createOrder);
+router.get("/", orderController.getAllOrders);
 
 export default router;

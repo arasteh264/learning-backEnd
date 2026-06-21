@@ -15,10 +15,10 @@ router.get(
   courseController.getAllCourses
 );
 
-// router.get(
-//   "/courses/:id",
-//   courseController.getCourse
-// );
+router.get(
+  "/course/:id",
+  courseController.getCourse
+);
 router.get("/latest", courseController.getLatestCourses);
 router.get("/search", courseController.searchCourse);
 router.put(
