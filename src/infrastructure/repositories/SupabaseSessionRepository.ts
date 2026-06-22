@@ -72,4 +72,17 @@ export class SupabaseSessionRepository implements SessionRepository {
 
     if (error) throw error;
   }
+  async findByCourseId(courseId: string) {
+  const { data, error } = await supabase
+    .from("sessions")
+    .select(`
+      *,
+      courses (id, name)
+    `)
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
 }

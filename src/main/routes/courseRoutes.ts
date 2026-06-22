@@ -16,7 +16,7 @@ router.get(
 );
 
 router.get(
-  "/course/:id",
+  "/:id",
   courseController.getCourse
 );
 router.get("/latest", courseController.getLatestCourses);
