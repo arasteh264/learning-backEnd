@@ -175,11 +175,11 @@ const getSliderByIdUseCase = new GetSliderByIdUseCase(sliderRepo);
 const updateSliderUseCase = new UpdateSliderUseCase(sliderRepo);
 const deleteSliderUseCase = new DeleteSliderUseCase(sliderRepo);
 
-const createSession = new CreateSessionUseCase(sessionRepo, storage);
-const getAllSessions = new GetAllSessionsUseCase(sessionRepo);
-const updateSession = new UpdateSessionUseCase(sessionRepo, storage);
-const deleteSession = new DeleteSessionUseCase(sessionRepo, storage);
-const getSessionsById = new GetSessionsByIdCourseUseCase(sessionRepo);
+const createSessionUseCase = new CreateSessionUseCase(sessionRepo, storage);
+const getAllSessionsUseCase = new GetAllSessionsUseCase(sessionRepo);
+const getSessionsByCourseUseCase = new GetSessionsByCourseUseCase(sessionRepo);
+const updateSessionUseCase = new UpdateSessionUseCase(sessionRepo, storage);
+const deleteSessionUseCase = new DeleteSessionUseCase(sessionRepo, storage);
 
 const banUserUseCase = new BanUserUseCase(userRepo);
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepo);
@@ -197,6 +197,7 @@ const deleteArticleUseCase = new DeleteArticleUseCase(articleRepo);
 const createCourseUseCase = new CreateCourseUseCase(courseRepo);
 const updateCourseUseCase = new UpdateCourseUseCase(courseRepo);
 const getAllCoursesUseCase = new GetAllCoursesUseCase(courseRepo);
+
 const deleteCourseUseCase = new DeleteCourseUseCase(
   courseRepo,
   sessionRepo,

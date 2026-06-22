@@ -2,36 +2,38 @@ import express from "express";
 import { sessionController } from "../container";
 import isAdminMiddleware from "../../middlewares/IsAdmin";
 import authMiddleware from "../../middlewares/auth";
-
-
-
+ 
 const router = express.Router();
-
+ 
 router.post(
-  "/courses/:courseId/sessions",
+  "/:courseId",
   authMiddleware,
   isAdminMiddleware,
   sessionController.create
 );
-
+ 
 router.get(
-  "/sessions",
-  authMiddleware,
+  "/",
   sessionController.getAll
 );
-
+ 
+router.get(
+  "/courses/:courseId",
+  sessionController.getByCourse
+);
+ 
 router.put(
-  "/sessions/:id",
+  "/:id",
   authMiddleware,
   isAdminMiddleware,
   sessionController.update
 );
-
+ 
 router.delete(
-  "/sessions/:id",
+  "/:id",
   authMiddleware,
   isAdminMiddleware,
   sessionController.delete
 );
-
+ 
 export default router;
