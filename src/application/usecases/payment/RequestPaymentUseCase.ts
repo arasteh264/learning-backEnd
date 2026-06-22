@@ -13,6 +13,9 @@ export class RequestPaymentUseCase {
     const order = await this.orderRepo.findById(orderId);
 
     if (!order) throw new Error("سفارش یافت نشد");
+    console.log("order.user_id:", JSON.stringify(order.user_id));
+    console.log("userId:", JSON.stringify(userId));
+    console.log("equal?", order.user_id === userId);
     if (order.user_id !== userId)
       throw new Error("شما مجاز به پرداخت این سفارش نیستید");
     if (order.status === "paid") throw new Error("این سفارش قبلاً پرداخت شده");
@@ -38,7 +41,6 @@ export class RequestPaymentUseCase {
       gateway: "zarinpal",
     });
 
-    // قدم ۵: وضعیت سفارش رو به "در انتظار پرداخت" تغییر می‌دیم
     await this.orderRepo.updateStatus(orderId, "awaiting_payment");
 
     return { free: false, paymentUrl };

@@ -90,6 +90,10 @@ import { VerifyPaymentUseCase } from "../application/usecases/payment/VerifyPaym
 import { OrderController } from "../interfaces/controllers/order.controller";
 import { PaymentController } from "../interfaces/controllers/payment.controller";
 import { CartController } from "../interfaces/controllers/cart.controller";
+import { GetOrderUseCase } from "../application/usecases/Order/GetOrder";
+import { GetAllTransactionsUseCase } from "../application/usecases/payment/GetAllTransactions";
+import { GetCourseUseCase } from "../application/usecases/course/Getcourse";
+import { GetSessionsByCourseUseCase } from "../application/usecases/session/Getsessionsbycourse";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -123,9 +127,21 @@ const registerUseCase = new RegisterUseCase(
 );
 
 const createOrderUseCase = new CreateOrderUseCase(cartRepo, orderRepo);
-const requestPaymentUseCase = new RequestPaymentUseCase(orderRepo, transactionRepo, paymentGateway);
-const verifyPaymentUseCase = new VerifyPaymentUseCase(orderRepo, transactionRepo, enrollmentRepo, paymentGateway);
-
+const getOrderUseCase = new GetOrderUseCase(orderRepo);
+const requestPaymentUseCase = new RequestPaymentUseCase(
+  orderRepo,
+  transactionRepo,
+  paymentGateway,
+);
+const verifyPaymentUseCase = new VerifyPaymentUseCase(
+  orderRepo,
+  transactionRepo,
+  enrollmentRepo,
+  paymentGateway,
+);
+const getAllTransactionsUseCase = new GetAllTransactionsUseCase(
+  transactionRepo,
+);
 const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo);
 const getAllCategoriesUseCase = new GetAllCategoriesUseCase(categoryRepo);
 const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepo);
@@ -163,6 +179,7 @@ const createSession = new CreateSessionUseCase(sessionRepo, storage);
 const getAllSessions = new GetAllSessionsUseCase(sessionRepo);
 const updateSession = new UpdateSessionUseCase(sessionRepo, storage);
 const deleteSession = new DeleteSessionUseCase(sessionRepo, storage);
+const getSessionsById = new GetSessionsByIdCourseUseCase(sessionRepo);
 
 const banUserUseCase = new BanUserUseCase(userRepo);
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepo);
@@ -185,9 +202,12 @@ const deleteCourseUseCase = new DeleteCourseUseCase(
   sessionRepo,
   storage,
 );
+const getCourseUseCase = new GetCourseUseCase(courseRepo);
 const searchCourseUseCase = new SearchCourseUseCase(courseRepo);
 const getLatestCoursesUseCase = new GetLatestCoursesUseCase(courseRepo);
-const getPopularFreeCoursesUseCase = new GetPopularFreeCoursesUseCase(courseRepo);
+const getPopularFreeCoursesUseCase = new GetPopularFreeCoursesUseCase(
+  courseRepo,
+);
 
 const createTeacherUseCase = new CreateTeacherUseCase(teacherRepo);
 const getVerifiedTeachersUseCase = new GetVerifiedTeachersUseCase(teacherRepo);
@@ -206,9 +226,10 @@ export const courseController = new CourseController(
   updateCourseUseCase,
   deleteCourseUseCase,
   getAllCoursesUseCase,
+  getCourseUseCase,
   searchCourseUseCase,
-getLatestCoursesUseCase,
-getPopularFreeCoursesUseCase,
+  getLatestCoursesUseCase,
+  getPopularFreeCoursesUseCase,
 );
 
 export const categoryController = new CategoryController(
@@ -219,10 +240,11 @@ export const categoryController = new CategoryController(
 );
 
 export const sessionController = new SessionController(
-  createSession,
-  getAllSessions,
-  updateSession,
-  deleteSession,
+  createSessionUseCase,
+  getAllSessionsUseCase,
+  getSessionsByCourseUseCase,
+  updateSessionUseCase,
+  deleteSessionUseCase,
 );
 
 export const authController = new AuthController(registerUseCase, loginUseCase);
@@ -262,19 +284,24 @@ export const sliderController = new SliderController(
   deleteSliderUseCase,
 );
 export const articleController = new ArticleController(
-
   createArticleUseCase,
   getAllArticlesUseCase,
   getArticleBySlugUseCase,
   updateArticleUseCase,
   deleteArticleUseCase,
-  getArticleBySlugUseCase
-
+  getArticleBySlugUseCase,
 );
 export const cartController = new CartController(
   getCartUseCase,
   addToCartUseCase,
   removeFromCartUseCase,
 );
-export const orderController = new OrderController(createOrderUseCase);
-export const paymentController = new PaymentController(requestPaymentUseCase, verifyPaymentUseCase);
+export const orderController = new OrderController(
+  createOrderUseCase,
+  getOrderUseCase,
+);
+export const paymentController = new PaymentController(
+  requestPaymentUseCase,
+  verifyPaymentUseCase,
+  getAllTransactionsUseCase,
+);

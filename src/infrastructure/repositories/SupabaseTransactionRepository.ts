@@ -64,4 +64,17 @@ export class SupabaseTransactionRepository implements TransactionRepository {
     if (error) throw error;
     return data;
   }
+  async findAll() {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select(`
+      *,
+      user:user_id ( id, name, phone ),
+      order:order_id ( id, totalprice, status )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
 }

@@ -8,7 +8,7 @@ export interface TransactionRepository {
   }): Promise<any>;
 
   findByAuthority(authority: string): Promise<any | null>;
-
+  findAll(): Promise<any[]>;
   markAsSuccess(id: string, refId: string): Promise<any>;
   markAsFailed(id: string): Promise<any>;
 }

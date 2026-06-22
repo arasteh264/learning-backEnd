@@ -16,7 +16,6 @@ export class CreateOrderUseCase {
     if (!cart || !cart.cart_items?.length) {
       throw new Error("سبد خرید شما خالی است");
     }
-    console.log("Creating order...", cart.cart_items);
     const items = cart.cart_items.map((item: any) => {
       const course = item?.courses;
 

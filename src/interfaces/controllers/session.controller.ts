@@ -4,6 +4,7 @@ import { GetAllSessionsUseCase } from "../../application/usecases/session/GetAll
 import { DeleteSessionUseCase } from "../../application/usecases/session/DeleteSession";
 import { UpdateSessionUseCase } from "../../application/usecases/session/UpdateSession";
 import { CreateSessionUseCase } from "../../application/usecases/session/CreateSession";
+import { GetSessionsByCourseUseCase } from "../../application/usecases/session/Getsessionsbycourse";
 type MulterRequest = Request & {
   file?: {
     fieldname: string;
@@ -21,6 +22,7 @@ export class SessionController {
   constructor(
     private createSession: CreateSessionUseCase,
     private getAllSessions: GetAllSessionsUseCase,
+    private getSessionsByCourse: GetSessionsByCourseUseCase,
     private updateSession: UpdateSessionUseCase,
     private deleteSession: DeleteSessionUseCase,
   ) {}
@@ -42,6 +44,17 @@ export class SessionController {
   getAll = async (_: Request, res: Response) => {
     const result = await this.getAllSessions.execute();
     return res.json(result);
+  };
+
+  getByCourse = async (req: Request, res: Response) => {
+    try {
+      const result = await this.getSessionsByCourse.execute(
+        req.params.courseId as string,
+      );
+      return res.json({ data: result });
+    } catch (e: any) {
+      return res.status(400).json({ message: e.message });
+    }
   };
 
   update = async (req: MulterRequest, res: Response) => {

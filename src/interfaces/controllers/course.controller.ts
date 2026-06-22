@@ -7,6 +7,7 @@ import { SearchCourseUseCase } from "../../application/usecases/course/SearchCou
 import { uploadFile } from "../../config/uploadSupabase";
 import { GetLatestCoursesUseCase } from "../../application/usecases/course/GetLatestCourses";
 import { GetPopularFreeCoursesUseCase } from "../../application/usecases/course/GetPopularFreeCourses";
+import { GetCourseUseCase } from "../../application/usecases/course/Getcourse";
 type MulterRequest = Request & {
   file?: {
     fieldname: string;
@@ -26,6 +27,7 @@ export class CourseController {
     private updateCourseUseCase: UpdateCourseUseCase,
     private deleteCourseUseCase: DeleteCourseUseCase,
     private getAllCoursesUseCase: GetAllCoursesUseCase,
+    private getCourseUseCase: GetCourseUseCase,
     private searchCourseUseCase: SearchCourseUseCase,
     private getLatestCoursesUseCase: GetLatestCoursesUseCase,
     private getPopularFreeCoursesUseCase: GetPopularFreeCoursesUseCase,
@@ -98,6 +100,22 @@ createCourse = async (req: MulterRequest, res: Response) => {
       });
     }
   };
+
+  getCourse = async (req: Request, res: Response) => {
+    try {
+      const course = await this.getCourseUseCase.execute(
+        req.params.id as string,
+      );
+
+      return res.status(200).json({ data: course });
+    } catch (err: any) {
+      const status = err.message === "دوره مورد نظر یافت نشد" ? 404 : 400;
+      return res.status(status).json({
+        message: err.message,
+      });
+    }
+  };
+
   searchCourse = async (req: Request, res: Response) => {
     try {
       const query = (req.query.q as string) || "";
