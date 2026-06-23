@@ -94,6 +94,7 @@ import { GetOrderUseCase } from "../application/usecases/Order/GetOrder";
 import { GetAllTransactionsUseCase } from "../application/usecases/payment/GetAllTransactions";
 import { GetCourseUseCase } from "../application/usecases/course/Getcourse";
 import { GetSessionsByCourseUseCase } from "../application/usecases/session/Getsessionsbycourse";
+import { GetSessionByIdUseCase } from "../application/usecases/session/Getsessionbyid";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -176,6 +177,7 @@ const updateSliderUseCase = new UpdateSliderUseCase(sliderRepo);
 const deleteSliderUseCase = new DeleteSliderUseCase(sliderRepo);
 
 const createSessionUseCase = new CreateSessionUseCase(sessionRepo, storage);
+const getSessionByIdUseCase = new GetSessionByIdUseCase(sessionRepo);
 const getAllSessionsUseCase = new GetAllSessionsUseCase(sessionRepo);
 const getSessionsByCourseUseCase = new GetSessionsByCourseUseCase(sessionRepo);
 const updateSessionUseCase = new UpdateSessionUseCase(sessionRepo, storage);
@@ -243,6 +245,7 @@ export const categoryController = new CategoryController(
 export const sessionController = new SessionController(
   createSessionUseCase,
   getAllSessionsUseCase,
+  getSessionByIdUseCase,   
   getSessionsByCourseUseCase,
   updateSessionUseCase,
   deleteSessionUseCase,

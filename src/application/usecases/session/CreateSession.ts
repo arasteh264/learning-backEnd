@@ -9,9 +9,11 @@ export class CreateSessionUseCase {
   async execute(data: any, file: any, courseId: string) {
     if (!file) throw new Error("ویدیو ارسال نشده");
 
+    if (!courseId) throw new Error("شناسه دوره ارسال نشده");
+
     const uploaded = await this.storage.upload(
       file,
-      "videos",
+      "session-vedio",
       "sessions"
     );
 
@@ -19,7 +21,7 @@ export class CreateSessionUseCase {
       ...data,
       video: uploaded.url,
       course_id: courseId,
-      free: data.free === "1" || data.free === 1
+      free: data.free === "1" || data.free === 1,
     });
   }
 }
