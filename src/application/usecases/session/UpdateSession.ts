@@ -11,6 +11,7 @@ export class UpdateSessionUseCase {
 
     if (!session) throw new Error("جلسه یافت نشد");
 
+    
     const updateData: any = {
       title: data.title,
       time: data.time,
