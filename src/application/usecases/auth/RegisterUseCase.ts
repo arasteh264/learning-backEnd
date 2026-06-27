@@ -1,4 +1,5 @@
 
+import { User } from "../../../domain/entities/user";
 import { AuthRepository } from "../../../domain/repositories/AuthRepository";
 import { BcryptPasswordService } from "../../../infrastructure/services/BcryptPasswordService";
 import { JwtTokenService } from "../../../infrastructure/services/JwtTokenService";
@@ -11,40 +12,49 @@ export class RegisterUseCase {
   ) {}
 
   async execute(data: any) {
-    const banned = await this.userRepo.findByPhone(data.phone);
+    const bannedUser = await this.userRepo.findByPhone(data.phone);
 
-    if (banned) {
+    if (bannedUser) {
       throw new Error("حساب کاربری شما مسدود است");
     }
 
-    const existing = await this.userRepo.findByEmailOrUsername(data.email);
+    const existingUser = await this.userRepo.findByEmailOrUsername(
+      data.email,
+    );
 
-    if (existing) {
+    if (existingUser) {
       throw new Error("کاربر تکراری است");
     }
 
     const count = await this.userRepo.count();
+    const role: "ADMIN" | "USER" = count === 0 ? "ADMIN" : "USER";
 
-    const role = count === 0 ? "ADMIN" : "USER";
+    const hashedPassword = await this.passwordService.hash(data.password);
 
-    const hashed = await this.passwordService.hash(data.password);
-
-    const user = await this.userRepo.create({
-      username: data.userName,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      password: hashed,
+    const userEntity = new User(
+      crypto.randomUUID(),
+      data.userName,
+      data.name,
+      data.email,
+      hashedPassword,
+      data.phone,
       role,
-    });
+      false,
+      new Date(),
+      new Date(),
+    );
+
+    const user = await this.userRepo.create(userEntity);
 
     const accessToken = this.tokenService.generate(user.id);
 
-    const { password, ...safeUser } = user;
-
     return {
-      user: safeUser,
       accessToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      },
     };
   }
 }

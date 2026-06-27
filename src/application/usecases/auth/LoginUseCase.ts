@@ -1,38 +1,57 @@
 
+import { User } from "../../../domain/entities/user";
 import { AuthRepository } from "../../../domain/repositories/AuthRepository";
 import { BcryptPasswordService } from "../../../infrastructure/services/BcryptPasswordService";
 import { JwtTokenService } from "../../../infrastructure/services/JwtTokenService";
 
 export class LoginUseCase {
   constructor(
-    private userRepo: AuthRepository,
-    private passwordService: BcryptPasswordService,
-    private tokenService: JwtTokenService,
+    private userRepo: any,
+    private passwordService: any,
+    private tokenService: any,
   ) {}
 
   async execute(identifier: string, password: string) {
-    const user = await this.userRepo.findByEmailOrUsername(identifier);
+    const userData = await this.userRepo.findByEmailOrUsername(identifier);
 
-    if (!user) {
+    if (!userData) {
       throw new Error("کاربر پیدا نشد");
     }
 
-    const isValid = await this.passwordService.compare(password, user.password);
+    const user = new User(
+      userData.id,
+      userData.username,
+      userData.name,
+      userData.email,
+      userData.password,
+      userData.phone,
+      userData.role,
+      userData.ban_status,
+      userData.created_at,
+      userData.updated_at,
+    );
+
+    if (user.isBanned()) {
+      throw new Error("کاربر مسدود است");
+    }
+
+    const isValid = await this.passwordService.compare(
+      password,
+      user.password,
+    );
 
     if (!isValid) {
       throw new Error("رمز اشتباه است");
     }
 
-    const accessToken = this.tokenService.generate(user.id);
-
-    const { password: _, ...safeUser } = user;
+    const token = this.tokenService.generate(user.id);
 
     return {
-      accessToken,
+      accessToken: token,
       user: {
-        id: safeUser.id,
-        userName: safeUser.username,
-        role: safeUser.role,
+        id: user.id,
+        username: user.username,
+        role: user.role,
       },
     };
   }

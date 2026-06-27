@@ -4,6 +4,15 @@ export class GetAllTeachersUseCase {
   constructor(private repo: TeacherRepository) {}
 
   async execute() {
-    return await this.repo.findAll();
+    const teachers = await this.repo.findAll();
+
+    return (teachers || []).map((teacher) => ({
+      id: teacher.id,
+      userId: teacher.userId,
+      bio: teacher.bio,
+      expertise: teacher.expertise,
+      rating: teacher.rating,
+      isVerified: teacher.isVerified,
+    }));
   }
 }

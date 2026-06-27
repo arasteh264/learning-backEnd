@@ -4,11 +4,14 @@ export class GetVerifiedTeachersUseCase {
   constructor(private repo: TeacherRepository) {}
 
   async execute() {
-    const data = await this.repo.findVerified();
+    const teachers = await this.repo.findVerified();
 
-    return (data || []).map((t: any) => ({
-      id: t.id,
-      name: t.users?.name || null
+    return (teachers || []).map((teacher) => ({
+      id: teacher.id,
+      userId: teacher.userId,
+      bio: teacher.bio,
+      expertise: teacher.expertise,
+      rating: teacher.rating,
     }));
   }
 }

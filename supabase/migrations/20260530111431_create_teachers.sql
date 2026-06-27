@@ -7,7 +7,7 @@ create table teachers (
 
   expertise text[] default '{}',
 
-  rating numeric default 0,
+  rating numeric default 0 check (rating >= 0 and rating <= 5),
 
   is_verified boolean default false,
 
