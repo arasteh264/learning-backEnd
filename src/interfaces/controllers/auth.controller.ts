@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { LoginUseCase } from "../../application/usecases/auth/LoginUseCase";
 import { RegisterUseCase } from "../../application/usecases/auth/RegisterUseCase";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { AuthMessages } from "../../shared/messages/auth.messages";
+
 
 export class AuthController {
   constructor(
@@ -8,32 +12,28 @@ export class AuthController {
     private loginUseCase: LoginUseCase,
   ) {}
 
-  register = async (req: Request, res: Response) => {
-    try {
-      const result = await this.registerUseCase.execute(req.body);
+  register = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.registerUseCase.execute(req.body);
 
-      return res.status(201).json({
-        message: "ثبت شد",
-        ...result,
-      });
-    } catch (err: any) {
-      return res.status(400).json({
-        message: err.message,
-      });
-    }
-  };
+    return ApiResponse.created(
+      res,
+      result,
+      AuthMessages.REGISTERED,
+    );
+  });
 
-  login = async (req: Request, res: Response) => {
-    try {
-      const { identifier, password } = req.body;
+  login = asyncHandler(async (req: Request, res: Response) => {
+    const { identifier, password } = req.body;
 
-      const result = await this.loginUseCase.execute(identifier, password);
+    const result = await this.loginUseCase.execute(
+      identifier,
+      password,
+    );
 
-      return res.json(result);
-    } catch (err: any) {
-      return res.status(401).json({
-        message: err.message,
-      });
-    }
-  };
+    return ApiResponse.success(
+      res,
+      result,
+      AuthMessages.LOGIN_SUCCESS,
+    );
+  });
 }

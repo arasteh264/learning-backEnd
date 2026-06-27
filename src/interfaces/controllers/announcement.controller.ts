@@ -6,6 +6,9 @@ import { DeleteAnnouncementUseCase } from "../../application/usecases/announceme
 import { IsActiveAnnouncementUseCase } from "../../application/usecases/announcement/StatueActiveAnnouncement";
 import { GetActiveAnnouncementUseCase } from "../../application/usecases/announcement/GetActiveAnnouncement";
 import { GetAnnouncementByIdUseCase } from "../../application/usecases/announcement/GetAnnouncementByIdUseCase";
+import { ApiResponse } from "../../shared/http/api-response";
+import { AnnouncementMessages } from "../../shared/messages/announcement.messages";
+import { asyncHandler } from "../../shared/asyncHandler";
 
 export class AnnouncementController {
   constructor(
@@ -18,80 +21,45 @@ export class AnnouncementController {
     private getByIdUseCase: GetAnnouncementByIdUseCase,
   ) {}
 
-  create = async (req: Request, res: Response) => {
-    console.log(req.body);
+  create = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.createUseCase.execute(req.body);
 
-    try {
-      const result = await this.createUseCase.execute(req.body);
+    return ApiResponse.created(res, result, AnnouncementMessages.CREATED);
+  });
 
-      return res.status(201).json({
-        message: " با موفقیت افزوده شد",
-        Announcement: result,
-      });
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
-    }
-  };
-
-  getAll = async (_req: Request, res: Response) => {
+  getAll = asyncHandler(async (_req: Request, res: Response) => {
     const result = await this.getAllUseCase.execute();
 
-    return res.status(200).json(result);
-  };
-  findById = async (req: Request, res: Response) => {
+    return ApiResponse.success(res, result, AnnouncementMessages.FETCHED);
+  });
+
+  findById = asyncHandler(async (req: Request, res: Response) => {
     const result = await this.getByIdUseCase.execute(req.params.id as string);
 
-    return res.status(200).json(result);
-  };
-  getActive = async (_req: Request, res: Response) => {
+    return ApiResponse.success(res, result, AnnouncementMessages.FETCHED);
+  });
+
+  getActive = asyncHandler(async (_req: Request, res: Response) => {
     const result = await this.getActiveUseCase.execute();
-    return res.status(200).json(result);
-  };
 
-  update = async (req: Request, res: Response) => {
-    try {
-      const result = await this.updateUseCase.execute(
-        req.params.id as string,
-        req.body,
-      );
+    return ApiResponse.success(res, result, AnnouncementMessages.FETCHED);
+  });
 
-      return res.json({
-        message: "بنر ویرایش شد",
-        Announcement: result,
-      });
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
-    }
-  };
+  update = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.updateUseCase.execute(req.params.id as string, req.body);
 
-  delete = async (req: Request, res: Response) => {
-    console.log(req.params.id);
+    return ApiResponse.success(res, result, AnnouncementMessages.UPDATED);
+  });
 
-    try {
-      await this.deleteUseCase.execute(req.params.id as string);
+  delete = asyncHandler(async (req: Request, res: Response) => {
+    await this.deleteUseCase.execute(req.params.id as string);
 
-      return res.json({
-        message: "بنر حذف شد",
-      });
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
-    }
-  };
-  isActive = async (req: Request, res: Response) => {
-    try {
-      const result = await this.isActiveUseCase.execute(
-        req.params.id as string,
-      );
-      return res.status(200).json({
-        message: "وضعیت بنر تغییر کرد",
-        Announcement: result,
-      });
-    } catch (error: any) {
-      console.error("FULL ERROR:", JSON.stringify(error, null, 2));
-      return res.status(500).json({
-        message: error.message,
-        details: error,
-      });
-    }
-  };
+    return ApiResponse.deleted(res, AnnouncementMessages.DELETED);
+  });
+
+  isActive = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.isActiveUseCase.execute(req.params.id as string);
+
+    return ApiResponse.success(res, result, AnnouncementMessages.UPDATED);
+  });
 }

@@ -2,6 +2,13 @@ import { Request, Response } from "express";
 import { GetCartUseCase } from "../../application/usecases/cart/GetCart";
 import { AddToCartUseCase } from "../../application/usecases/cart/AddToCart";
 import { RemoveFromCartUseCase } from "../../application/usecases/cart/RemoveFromCart";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { CartMessages } from "../../shared/messages/cart.messages";
+
+type AuthRequest = Request & {
+  user: { id: string };
+};
 
 export class CartController {
   constructor(
@@ -10,42 +17,51 @@ export class CartController {
     private removeFromCartUseCase: RemoveFromCartUseCase
   ) {}
 
-  getCart = async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      const cart = await this.getCartUseCase.execute(userId);
-      return res.status(200).json(cart);
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
+  getCart = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user.id;
+
+    const cart = await this.getCartUseCase.execute(userId);
+
+    return ApiResponse.success(
+      res,
+      cart,
+      CartMessages.FETCHED,
+    );
+  });
+
+  addToCart = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user.id;
+    const { courseId } = req.body;
+
+    if (!courseId) {
+      throw new Error(CartMessages.COURSE_REQUIRED);
     }
-  };
 
-  addToCart = async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      const { courseId } = req.body;
+    const result = await this.addToCartUseCase.execute(
+      userId,
+      courseId,
+    );
 
-      if (!courseId) throw new Error("courseId الزامی است");
+    return ApiResponse.created(
+      res,
+      result,
+      CartMessages.ADDED,
+    );
+  });
 
-      const result = await this.addToCartUseCase.execute(userId, courseId);
-      return res.status(201).json({
-        message: "دوره با موفقیت به سبد اضافه شد",
-        item: result,
-      });
-    } catch (err: any) {
-      return res.status(400).json({ message: err.message });
-    }
-  };
+  removeFromCart = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user.id;
+    const courseId = req.params.courseId as string;
 
-  removeFromCart = async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      const { courseId } = req.params;
+    await this.removeFromCartUseCase.execute(
+      userId,
+      courseId,
+    );
 
-      await this.removeFromCartUseCase.execute(userId, courseId);
-      return res.status(200).json({ message: "دوره از سبد حذف شد" });
-    } catch (err: any) {
-      return res.status(400).json({ message: err.message });
-    }
-  };
+    return ApiResponse.success(
+      res,
+      null,
+      CartMessages.REMOVED,
+    );
+  });
 }
