@@ -5,6 +5,14 @@ import { RequestForTeacherUseCase } from "../../application/usecases/teacher/Req
 import { VerifyTeacherUseCase } from "../../application/usecases/teacher/VerifyTeacher";
 import { RemoveTeacherUseCase } from "../../application/usecases/teacher/RemoveTeacher";
 import { GetVerifiedTeachersUseCase } from "../../application/usecases/teacher/GetVerifiedTeachers";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { TeacherMessages } from "../../shared/messages/teacher.messages";
+
+type AuthRequest = Request & {
+  user?: { id: string };
+};
+
 export class TeacherController {
   constructor(
     private createTeacherUC: CreateTeacherUseCase,
@@ -15,62 +23,76 @@ export class TeacherController {
     private getVerifiedTeachersUC: GetVerifiedTeachersUseCase,
   ) {}
 
-  create = async (req: Request, res: Response) => {
-    try {
-      const { userId, bio, expertise } = req.body;
+  create = asyncHandler(async (req: Request, res: Response) => {
+    const { userId, bio, expertise } = req.body;
 
-      const result = await this.createTeacherUC.execute(userId, bio, expertise);
+    const result = await this.createTeacherUC.execute(
+      userId,
+      bio,
+      expertise,
+    );
 
-      return res.status(201).json({
-        message: "استاد ساخته شد",
-        teacher: result,
-      });
-    } catch (e: any) {
-      return res.status(400).json({ message: e.message });
-    }
-  };
+    return ApiResponse.created(
+      res,
+      result,
+      TeacherMessages.CREATED,
+    );
+  });
 
-  getAll = async (_: Request, res: Response) => {
+  getAll = asyncHandler(async (_req: Request, res: Response) => {
     const result = await this.getAllTeachersUC.execute();
-    return res.json(result);
-  };
 
-  request = async (req: Request, res: Response) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+    return ApiResponse.success(
+      res,
+      result,
+      TeacherMessages.FETCHED,
+    );
+  });
 
-      const result = await this.requestTeacherUC.execute(
-        req.user.id,
-        req.body.bio,
-        req.body.expertise,
-      );
-
-      return res.json({
-        message: "درخواست ثبت شد",
-        data: result,
-      });
-    } catch (e: any) {
-      return res.status(400).json({ message: e.message });
+  request = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user?.id) {
+      throw new Error(TeacherMessages.UNAUTHORIZED);
     }
-  };
 
-  verify = async (req: Request, res: Response) => {
+    const result = await this.requestTeacherUC.execute(
+      req.user.id,
+      req.body.bio,
+      req.body.expertise,
+    );
+
+    return ApiResponse.success(
+      res,
+      result,
+      TeacherMessages.REQUESTED,
+    );
+  });
+
+  verify = asyncHandler(async (req: Request, res: Response) => {
     const result = await this.verifyTeacherUC.execute(req.params.id as string);
-    return res.json({ message: "تایید شد", data: result });
-  };
 
-  remove = async (req: Request, res: Response) => {
+    return ApiResponse.success(
+      res,
+      result,
+      TeacherMessages.VERIFIED,
+    );
+  });
+
+  remove = asyncHandler(async (req: Request, res: Response) => {
     await this.removeTeacherUC.execute(req.params.id as string);
-    return res.json({ message: "حذف شد" });
-  };
 
-  getVerified = async (_: Request, res: Response) => {
+    return ApiResponse.deleted(
+      res,
+      TeacherMessages.REMOVED,
+    );
+  });
+
+  getVerified = asyncHandler(async (_req: Request, res: Response) => {
     const result = await this.getVerifiedTeachersUC.execute();
-    return res.json({
-      success: true,
-      data: result,
-    });
-  };
+
+    return ApiResponse.success(
+      res,
+      result,
+      TeacherMessages.FETCHED_VERIFIED,
+    );
+  });
 }

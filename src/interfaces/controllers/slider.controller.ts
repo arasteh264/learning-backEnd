@@ -6,6 +6,13 @@ import { UpdateSliderUseCase } from "../../application/usecases/slider/UpdateSli
 import { DeleteSliderUseCase } from "../../application/usecases/slider/DeleteSlider";
 import { uploadFile } from "../../config/uploadSupabase";
 import { deleteFile } from "../../config/storageSupabase";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { SliderMessages } from "../../shared/messages/slider.messages";
+
+type MulterRequest = Request & {
+  file?: Express.Multer.File;
+};
 
 export class SliderController {
   constructor(
@@ -16,10 +23,12 @@ export class SliderController {
     private deleteUseCase: DeleteSliderUseCase,
   ) {}
 
-create = async (req: Request, res: Response) => {
-  try {
+  create = asyncHandler(async (req: MulterRequest, res: Response) => {
     const file = req.file;
-    if (!file) return res.status(400).json({ message: "عکس الزامی است" });
+
+    if (!file) {
+      throw new Error(SliderMessages.IMAGE_REQUIRED);
+    }
 
     const { url } = await uploadFile(file, "sliders", "sliders");
 
@@ -29,71 +38,74 @@ create = async (req: Request, res: Response) => {
       is_active: false,
     });
 
-    return res.status(201).json({
-      message: "اسلایدر با موفقیت افزوده شد",
-      slider: result,
-    });
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message });
-  }
-};
+    return ApiResponse.created(
+      res,
+      result,
+      SliderMessages.CREATED,
+    );
+  });
 
-  getAll = async (_req: Request, res: Response) => {
-    try {
-      const result = await this.getAllUseCase.execute();
-      return res.status(200).json(result);
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
-    }
-  };
+  getAll = asyncHandler(async (_req: Request, res: Response) => {
+    const result = await this.getAllUseCase.execute();
 
-  getById = async (req: Request, res: Response) => {
-    try {
-      const result = await this.getByIdUseCase.execute(req.params.id as string);
-      return res.status(200).json(result);
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
-    }
-  };
+    return ApiResponse.success(
+      res,
+      result,
+      SliderMessages.FETCHED,
+    );
+  });
 
-update = async (req: Request, res: Response) => {
-  try {
-    const file = req.file;
+  getById = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.getByIdUseCase.execute(req.params.id as string);
+
+    return ApiResponse.success(
+      res,
+      result,
+      SliderMessages.FETCHED_ONE,
+    );
+  });
+
+  update = asyncHandler(async (req: MulterRequest, res: Response) => {
+    const id = req.params.id as string;
     let image_url: string | undefined;
 
-    if (file) {
-      const old = await this.getByIdUseCase.execute(req.params.id as string);
-      if (old?.image_url) await deleteFile(old.image_url, "sliders");
+    if (req.file) {
+      const old = await this.getByIdUseCase.execute(id);
 
-      const uploaded = await uploadFile(file, "sliders", "sliders");
+      if (old?.image_url) {
+        await deleteFile(old.image_url, "sliders");
+      }
+
+      const uploaded = await uploadFile(req.file, "sliders", "sliders");
       image_url = uploaded.url;
     }
 
-    const result = await this.updateUseCase.execute(req.params.id as string, {
+    const result = await this.updateUseCase.execute(id, {
       ...req.body,
       ...(image_url && { image_url }),
     });
 
-    return res.status(200).json({
-      message: "اسلایدر ویرایش شد",
-      slider: result,
-    });
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message });
-  }
-};
+    return ApiResponse.success(
+      res,
+      result,
+      SliderMessages.UPDATED,
+    );
+  });
 
-  delete = async (req: Request, res: Response) => {
-  try {
-    const slider = await this.getByIdUseCase.execute(req.params.id as string);
-    
-    if (slider?.image_url) await deleteFile(slider.image_url, "sliders");
+  delete = asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
 
-    await this.deleteUseCase.execute(req.params.id as string);
-    
-    return res.status(200).json({ message: "اسلایدر حذف شد" });
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message });
-  }
-};
+    const slider = await this.getByIdUseCase.execute(id);
+
+    if (slider?.image_url) {
+      await deleteFile(slider.image_url, "sliders");
+    }
+
+    await this.deleteUseCase.execute(id);
+
+    return ApiResponse.deleted(
+      res,
+      SliderMessages.DELETED,
+    );
+  });
 }

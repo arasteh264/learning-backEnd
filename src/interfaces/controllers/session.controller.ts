@@ -5,19 +5,12 @@ import { DeleteSessionUseCase } from "../../application/usecases/session/DeleteS
 import { UpdateSessionUseCase } from "../../application/usecases/session/UpdateSession";
 import { CreateSessionUseCase } from "../../application/usecases/session/CreateSession";
 import { GetSessionByIdUseCase } from "../../application/usecases/session/Getsessionbyid";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { SessionMessages } from "../../shared/messages/session.messages";
 
 type MulterRequest = Request & {
-  file?: {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    size: number;
-    destination: string;
-    filename: string;
-    path: string;
-    buffer: Buffer;
-  };
+  file?: Express.Multer.File;
 };
 
 export class SessionController {
@@ -30,72 +23,72 @@ export class SessionController {
     private deleteSession: DeleteSessionUseCase,
   ) {}
 
-  create = async (req: MulterRequest, res: Response) => {
-    try {
-      const result = await this.createSession.execute(
-        req.body,
-        req.file,
-        req.params.courseId as string,
-      );
-      return res.status(201).json(result);
-    } catch (e: any) {
-      console.error("[SessionController.create]", e);
-      return res.status(400).json({
-        message: e?.message || "خطای ناشناخته",
-        detail: e?.details || e?.hint || undefined,
-      });
-    }
-  };
+  create = asyncHandler(async (req: MulterRequest, res: Response) => {
+    const result = await this.createSession.execute(
+      req.body,
+      req.file,
+      req.params.courseId as string,
+    );
 
-  getAll = async (_: Request, res: Response) => {
-    try {
-      const result = await this.getAllSessions.execute();
-      return res.json(result);
-    } catch (e: any) {
-      return res.status(500).json({ message: e.message });
-    }
-  };
+    return ApiResponse.created(
+      res,
+      result,
+      SessionMessages.CREATED,
+    );
+  });
 
-  getById = async (req: Request, res: Response) => {
-    try {
-      const result = await this.getSessionById.execute(req.params.id as string);
-      return res.json(result);
-    } catch (e: any) {
-      const status = e.message === "جلسه یافت نشد" ? 404 : 400;
-      return res.status(status).json({ message: e.message });
-    }
-  };
+  getAll = asyncHandler(async (_req: Request, res: Response) => {
+    const result = await this.getAllSessions.execute();
 
-  getByCourse = async (req: Request, res: Response) => {
-    try {
-      const result = await this.getSessionsByCourse.execute(
-        req.params.courseId as string,
-      );
-      return res.json({ data: result });
-    } catch (e: any) {
-      return res.status(400).json({ message: e.message });
-    }
-  };
+    return ApiResponse.success(
+      res,
+      result,
+      SessionMessages.FETCHED,
+    );
+  });
 
-  update = async (req: MulterRequest, res: Response) => {
-    try {
-      const result = await this.updateSession.execute(
-        req.params.id as string,
-        req.body,
-        req.file,
-      );
-      return res.json(result);
-    } catch (e: any) {
-      return res.status(400).json({ message: e.message });
-    }
-  };
+  getById = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.getSessionById.execute(req.params.id as string);
 
-  delete = async (req: Request, res: Response) => {
-    try {
-      await this.deleteSession.execute(req.params.id as string);
-      return res.json({ message: "deleted" });
-    } catch (e: any) {
-      return res.status(400).json({ message: e.message });
-    }
-  };
+    return ApiResponse.success(
+      res,
+      result,
+      SessionMessages.FETCHED_ONE,
+    );
+  });
+
+  getByCourse = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.getSessionsByCourse.execute(
+      req.params.courseId as string,
+    );
+
+    return ApiResponse.success(
+      res,
+      result,
+      SessionMessages.FETCHED_BY_COURSE,
+    );
+  });
+
+  update = asyncHandler(async (req: MulterRequest, res: Response) => {
+    const result = await this.updateSession.execute(
+      req.params.id as string,
+      req.body,
+      req.file,
+    );
+
+    return ApiResponse.success(
+      res,
+      result,
+      SessionMessages.UPDATED,
+    );
+  });
+
+  delete = asyncHandler(async (req: Request, res: Response) => {
+    await this.deleteSession.execute(req.params.id as string);
+
+    return ApiResponse.deleted(
+      res,
+      SessionMessages.DELETED,
+    );
+  });
 }

@@ -2,7 +2,13 @@ import { Request, Response } from "express";
 import { RequestPaymentUseCase } from "../../application/usecases/payment/RequestPaymentUseCase";
 import { VerifyPaymentUseCase } from "../../application/usecases/payment/VerifyPaymentUseCase";
 import { GetAllTransactionsUseCase } from "../../application/usecases/payment/GetAllTransactions";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { PaymentMessages } from "../../shared/messages/payment.message";
 
+type AuthRequest = Request & {
+  user: { id: string };
+};
 
 export class PaymentController {
   constructor(
@@ -11,60 +17,63 @@ export class PaymentController {
     private getAllTransactionsUseCase: GetAllTransactionsUseCase,
   ) {}
 
-  requestPayment = async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      const { orderId } = req.body;
+  requestPayment = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user.id;
+    const { orderId } = req.body;
 
-      if (!orderId) throw new Error("orderId الزامی است");
-
-      const result = await this.requestPaymentUseCase.execute(orderId, userId);
-
-      if (result.free) {
-        return res.status(200).json({
-          free: true,
-          message: "دوره رایگان با موفقیت فعال شد",
-        });
-      }
-
-      return res.status(200).json({
-        free: false,
-        paymentUrl: result.paymentUrl,
-      });
-    } catch (err: any) {
-      return res.status(400).json({ message: err.message });
+    if (!orderId) {
+      throw new Error("orderId الزامی است");
     }
-  };
 
-  verifyPayment = async (req: Request, res: Response) => {
-    try {
-      const authority = req.query.Authority as string;
-      const status = req.query.Status as string;
+    const result = await this.requestPaymentUseCase.execute(
+      orderId,
+      userId,
+    );
 
-      const result = await this.verifyPaymentUseCase.execute(authority, status);
-
-      const frontendUrl = process.env.FRONTEND_URL;
-
-      if (result.success) {
-        return res.redirect(
-          `${frontendUrl}/payment/success?orderId=${result.orderId}`
-        );
-      } else {
-        return res.redirect(
-          `${frontendUrl}/payment/failed?orderId=${result.orderId}`
-        );
-      }
-    } catch (err: any) {
-      const frontendUrl = process.env.FRONTEND_URL;
-      return res.redirect(`${frontendUrl}/payment/failed`);
+    if (result.free) {
+      return ApiResponse.success(
+        res,
+        null,
+        PaymentMessages.FREE_COURSE,
+      );
     }
-  };
-   getAllTransactions = async (req: Request, res: Response) => {
-    try {
-      const transactions = await this.getAllTransactionsUseCase.execute();
-      return res.status(200).json(transactions);
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
+
+    return ApiResponse.success(res, {
+      paymentUrl: result.paymentUrl,
+      free: false,
+    }, PaymentMessages.TRANSACTIONS_FETCHED);
+  });
+
+  verifyPayment = asyncHandler(async (req: Request, res: Response) => {
+    const authority = req.query.Authority as string;
+    const status = req.query.Status as string;
+
+    const result = await this.verifyPaymentUseCase.execute(
+      authority,
+      status,
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL!;
+
+    if (result.success) {
+      return res.redirect(
+        `${frontendUrl}/payment/success?orderId=${result.orderId}`,
+      );
     }
-  };
+
+    return res.redirect(
+      `${frontendUrl}/payment/failed?orderId=${result.orderId}`,
+    );
+  });
+
+  getAllTransactions = asyncHandler(async (_req: Request, res: Response) => {
+    const transactions =
+      await this.getAllTransactionsUseCase.execute();
+
+    return ApiResponse.success(
+      res,
+      transactions,
+      PaymentMessages.TRANSACTIONS_FETCHED,
+    );
+  });
 }

@@ -1,10 +1,20 @@
-export interface Announcement {
-  id: string;
-  text: string;
-  end_date: string;
-  is_active: boolean;
-}
+export class Announcement {
+  constructor(
+    public id: string,
+    public text: string,
+    public end_date: string,
+    public is_active: boolean,
+  ) {}
 
-export interface IAnnouncementRepository {
-  getActiveAnnouncement(): Promise<Announcement | null>;
+  activate() {
+    this.is_active = true;
+  }
+
+  deactivate() {
+    this.is_active = false;
+  }
+
+  isExpired() {
+    return new Date(this.end_date) < new Date();
+  }
 }

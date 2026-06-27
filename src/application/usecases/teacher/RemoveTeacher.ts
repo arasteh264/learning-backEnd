@@ -4,12 +4,14 @@ export class RemoveTeacherUseCase {
   constructor(private repo: TeacherRepository) {}
 
   async execute(id: string) {
-    const deleted = await this.repo.delete(id);
+    const teacher = await this.repo.findById(id);
 
-    if (!deleted) {
+    if (!teacher) {
       throw new Error("استاد یافت نشد");
     }
 
-    return deleted;
+    await this.repo.delete(id);
+
+    return { success: true };
   }
 }

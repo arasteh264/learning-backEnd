@@ -1,9 +1,15 @@
+import { Announcement } from "../entities/Announcement";
+
 export interface AnnouncementRepository {
-  create(data: any): Promise<any>;
-  findAll(): Promise<any[]>;
-  update(id: string, data: any): Promise<any>;
-  delete(id: string): Promise<any>;
-  isActive(id: string): Promise<any>;
-  findActive(): Promise<any[]>;
-   findById(id: string): Promise<any>;
+  create(data: Announcement): Promise<Announcement>;
+
+  findById(id: string): Promise<Announcement | null>;
+
+  findAll(): Promise<Announcement[]>;
+
+  update(id: string, data: Partial<Announcement>): Promise<Announcement>;
+
+  delete(id: string): Promise<void>;
+
+  findActive(): Promise<Announcement | null>;
 }
