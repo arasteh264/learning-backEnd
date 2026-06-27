@@ -4,23 +4,18 @@ import { CreateCourseUseCase } from "../../application/usecases/course/CreateCou
 import { DeleteCourseUseCase } from "../../application/usecases/course/DeleteCourse";
 import { GetAllCoursesUseCase } from "../../application/usecases/course/GetAllCourses";
 import { SearchCourseUseCase } from "../../application/usecases/course/SearchCourse";
-import { uploadFile } from "../../config/uploadSupabase";
 import { GetLatestCoursesUseCase } from "../../application/usecases/course/GetLatestCourses";
 import { GetPopularFreeCoursesUseCase } from "../../application/usecases/course/GetPopularFreeCourses";
 import { GetCourseUseCase } from "../../application/usecases/course/Getcourse";
+import { uploadFile } from "../../config/uploadSupabase";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { CourseMessages } from "../../shared/messages/course.messages";
+
 type MulterRequest = Request & {
-  file?: {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    size: number;
-    destination: string;
-    filename: string;
-    path: string;
-    buffer: Buffer;
-  };
+  file?: Express.Multer.File;
 };
+
 export class CourseController {
   constructor(
     private createCourseUseCase: CreateCourseUseCase,
@@ -33,29 +28,12 @@ export class CourseController {
     private getPopularFreeCoursesUseCase: GetPopularFreeCoursesUseCase,
   ) {}
 
-  updateCourse = async (req: MulterRequest, res: Response) => {
-    try {
-      const result = await this.updateCourseUseCase.execute(
-        req.params.id as string,
-        req.body,
-        req.file,
-      );
-
-      return res.status(200).json({
-        message: "دوره با موفقیت ویرایش شد",
-        course: result,
-      });
-    } catch (err: any) {
-      return res.status(400).json({
-        message: err.message,
-      });
-    }
-  };
-
-createCourse = async (req: MulterRequest, res: Response) => {
-  try {
+  createCourse = asyncHandler(async (req: MulterRequest, res: Response) => {
     const file = req.file;
-    if (!file) return res.status(400).json({ message: "عکس کاور الزامی است" });
+
+    if (!file) {
+      throw new Error(CourseMessages.COVER_REQUIRED);
+    }
 
     const { url } = await uploadFile(file, "courses", "covers");
 
@@ -64,92 +42,91 @@ createCourse = async (req: MulterRequest, res: Response) => {
       cover: url,
     });
 
-    return res.status(201).json({
-      message: "دوره با موفقیت افزوده شد",
-      course: result,
-    });
-  } catch (err: any) {
-    return res.status(400).json({
-      message: err.message,
-    });
-  }
-};
+    return ApiResponse.created(
+      res,
+      result,
+      CourseMessages.CREATED,
+    );
+  });
 
-  deleteCourse = async (req: Request, res: Response) => {
-    try {
-      await this.deleteCourseUseCase.execute(req.params.id as string);
+  updateCourse = asyncHandler(async (req: MulterRequest, res: Response) => {
+    const id = req.params.id;
 
-      return res.status(200).json({
-        message: "دوره و تمام جلسات با موفقیت حذف شد",
-      });
-    } catch (err: any) {
-      return res.status(400).json({
-        message: err.message,
-      });
-    }
-  };
+    const result = await this.updateCourseUseCase.execute(
+      id,
+      req.body,
+      req.file,
+    );
 
-  getAllCourses = async (req: Request, res: Response) => {
-    try {
-      const courses = await this.getAllCoursesUseCase.execute();
+    return ApiResponse.success(
+      res,
+      result,
+      CourseMessages.UPDATED,
+    );
+  });
 
-      return res.status(200).json(courses);
-    } catch (err: any) {
-      return res.status(500).json({
-        message: err.message,
-      });
-    }
-  };
+  deleteCourse = asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
 
-  getCourse = async (req: Request, res: Response) => {
-    try {
-      const course = await this.getCourseUseCase.execute(
-        req.params.id as string,
-      );
+    await this.deleteCourseUseCase.execute(id);
 
-      return res.status(200).json({ data: course });
-    } catch (err: any) {
-      const status = err.message === "دوره مورد نظر یافت نشد" ? 404 : 400;
-      return res.status(status).json({
-        message: err.message,
-      });
-    }
-  };
+    return ApiResponse.deleted(
+      res,
+      CourseMessages.DELETED,
+    );
+  });
 
-  searchCourse = async (req: Request, res: Response) => {
-    try {
-      const query = (req.query.q as string) || "";
+  getAllCourses = asyncHandler(async (_req: Request, res: Response) => {
+    const courses = await this.getAllCoursesUseCase.execute();
 
-      const courses = await this.searchCourseUseCase.execute(query);
+    return ApiResponse.success(
+      res,
+      courses,
+      CourseMessages.FETCHED,
+    );
+  });
 
-      return res.status(200).json(courses);
-    } catch (err: any) {
-      return res.status(500).json({
-        message: err.message,
-      });
-    }
-  };
-  getLatestCourses = async (req: Request, res: Response) => {
-    try {
-      const limit = req.query.limit ? Number(req.query.limit) : 8;
+  getCourse = asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
 
-      const courses = await this.getLatestCoursesUseCase.execute(limit);
+    const course = await this.getCourseUseCase.execute(id);
 
-      return res.status(200).json(courses);
-    } catch (err: any) {
-      return res.status(500).json({
-        message: err.message,
-      });
-    }
-  };
+    return ApiResponse.success(
+      res,
+      course,
+      CourseMessages.FETCHED_ONE,
+    );
+  });
 
-  getPopularFreeCourses = async (req: Request, res: Response) => {
-  try {
-    const limit = req.query.limit ? Number(req.query.limit) : 8;
+  searchCourse = asyncHandler(async (req: Request, res: Response) => {
+    const query = (req.query.q as string) || "";
+
+    const courses = await this.searchCourseUseCase.execute(query);
+
+    return ApiResponse.success(
+      res,
+      courses,
+      CourseMessages.SEARCHED,
+    );
+  });
+
+  getLatestCourses = asyncHandler(async (req: Request, res: Response) => {
+    const limit = req.query.limit
+      ? Number(req.query.limit)
+      : 8;
+
+    const courses = await this.getLatestCoursesUseCase.execute(limit);
+
+    return ApiResponse.success(res, courses, CourseMessages.FETCHED);
+  });
+
+  getPopularFreeCourses = asyncHandler(async (req: Request, res: Response) => {
+    const limit = req.query.limit
+      ? Number(req.query.limit)
+      : 8;
+
     const courses = await this.getPopularFreeCoursesUseCase.execute(limit);
-    return res.status(200).json(courses);
-  } catch (err: any) {
-    return res.status(500).json({ message: err.message });
-  }
-};
+
+    return ApiResponse.success(res, courses, CourseMessages.FETCHED);
+  });
 }

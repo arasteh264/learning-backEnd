@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import { CreateOrderUseCase } from "../../application/usecases/Order/CreateOrderUseCase";
 import { GetOrderUseCase } from "../../application/usecases/Order/GetOrder";
+import { ApiResponse } from "../../shared/http/api-response";
+import { asyncHandler } from "../../shared/asyncHandler";
+import { OrderMessages } from "../../shared/messages/common.messages";
+
+type AuthRequest = Request & {
+  user: { id: string };
+};
 
 export class OrderController {
   constructor(
@@ -8,31 +15,25 @@ export class OrderController {
     private getOrderUseCase: GetOrderUseCase
   ) {}
 
-  createOrder = async (req: Request, res: Response) => {
-    try {
-      
-      const userId = (req as any).user.id;
-      const order = await this.createOrderUseCase.execute(userId);
+  createOrder = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user.id;
 
-      return res.status(201).json({
-        message: "سفارش با موفقیت ایجاد شد",
-        order,
-      });
-    } catch (err: any) {
-      return res.status(400).json({ message: err.message });
-    }
-  };
-  
-  getAllOrders = async (req: Request, res: Response) => {
-    try {
-      const orders = await this.getOrderUseCase.execute();
+    const order = await this.createOrderUseCase.execute(userId);
 
-      return res.status(200).json(orders);
-    } catch (err: any) {
-      return res.status(500).json({
-        message: err.message,
-      });
-    }
-  };
-  
+    return ApiResponse.created(
+      res,
+      order,
+      OrderMessages.CREATED,
+    );
+  });
+
+  getAllOrders = asyncHandler(async (_req: Request, res: Response) => {
+    const orders = await this.getOrderUseCase.execute();
+
+    return ApiResponse.success(
+      res,
+      orders,
+      OrderMessages.FETCHED,
+    );
+  });
 }
