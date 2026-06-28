@@ -1,14 +1,14 @@
 
-import { User } from "../../../domain/entities/user";
+import { User } from "../../../domain/entities/User";
 import { AuthRepository } from "../../../domain/repositories/AuthRepository";
 import { BcryptPasswordService } from "../../../infrastructure/services/BcryptPasswordService";
 import { JwtTokenService } from "../../../infrastructure/services/JwtTokenService";
 
 export class LoginUseCase {
   constructor(
-    private userRepo: any,
-    private passwordService: any,
-    private tokenService: any,
+    private userRepo: AuthRepository,
+    private passwordService: BcryptPasswordService,
+    private tokenService: JwtTokenService,
   ) {}
 
   async execute(identifier: string, password: string) {
