@@ -9,7 +9,8 @@ export interface AnnouncementRepository {
 
   update(id: string, data: Partial<Announcement>): Promise<Announcement>;
 
-  delete(id: string): Promise<void>;
+  delete(id: string): Promise<boolean>;
 
   findActive(): Promise<Announcement | null>;
+  isActive(id: string): Promise<Announcement>;
 }

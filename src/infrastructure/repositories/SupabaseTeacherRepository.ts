@@ -2,7 +2,6 @@ import supabase from "../../config/supabase";
 import { TeacherRepository } from "../../domain/repositories/TeacherRepository";
 
 export class SupabaseTeacherRepository implements TeacherRepository {
-
   async create(data: any) {
     const { data: result, error } = await supabase
       .from("teachers")
@@ -15,9 +14,7 @@ export class SupabaseTeacherRepository implements TeacherRepository {
   }
 
   async findAll() {
-    const { data, error } = await supabase
-      .from("teachers")
-      .select(`
+    const { data, error } = await supabase.from("teachers").select(`
         *,
         users(name, email)
       `);
@@ -25,7 +22,21 @@ export class SupabaseTeacherRepository implements TeacherRepository {
     if (error) throw error;
     return data;
   }
+  async findById(id: string) {
+    const { data, error } = await supabase
+      .from("teachers")
+      .select(
+        `
+      *,
+      users(name, email)
+    `,
+      )
+      .eq("id", id)
+      .maybeSingle();
 
+    if (error) throw error;
+    return data;
+  }
   async findByUserId(userId: string) {
     const { data, error } = await supabase
       .from("teachers")
@@ -64,11 +75,13 @@ export class SupabaseTeacherRepository implements TeacherRepository {
   async findVerified() {
     const { data, error } = await supabase
       .from("teachers")
-      .select(`
+      .select(
+        `
         id,
         is_verified,
         users(name)
-      `)
+      `,
+      )
       .eq("is_verified", true);
 
     if (error) throw error;

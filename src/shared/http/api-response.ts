@@ -80,16 +80,16 @@ static deleted(
   }
 
   static error(
-    res: Response,
-    message = CommonMessages.INTERNAL_SERVER_ERROR,
-  ) {
-    return this.send(
-      res,
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      false,
-      message,
-    );
-  }
+  res: Response,
+  message: string = CommonMessages.INTERNAL_SERVER_ERROR, 
+) {
+  return this.send(
+    res,
+    HttpStatus.INTERNAL_SERVER_ERROR,
+    false,
+    message,
+  );
+}
 
   static fromError(
     res: Response,

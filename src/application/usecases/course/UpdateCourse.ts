@@ -1,9 +1,10 @@
+import { uploadFile } from "../../../config/uploadSupabase";
 import { CourseRepository } from "../../../domain/repositories/CourseRepository";
 
 export class UpdateCourseUseCase {
   constructor(private courseRepo: CourseRepository) {}
 
-  async execute(id: string, body: any) {
+  async execute(id: string, body: any,file?: Express.Multer.File) {
     const existingCourse = await this.courseRepo.findById(id);
 
     if (!existingCourse) {
@@ -21,7 +22,10 @@ export class UpdateCourseUseCase {
       category_id: body.category,
       creator_id: body.creator,
     };
-
+  if (file) {
+    const { url } = await uploadFile(file, "courses", "covers");
+    updateData.cover = url;
+  }
     if (body.cover) {
       updateData.cover = body.cover;
     }

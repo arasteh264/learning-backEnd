@@ -50,7 +50,7 @@ export class CourseController {
   });
 
   updateCourse = asyncHandler(async (req: MulterRequest, res: Response) => {
-    const id = req.params.id;
+    const id = req.params.id as string;
 
     const result = await this.updateCourseUseCase.execute(
       id,

@@ -293,7 +293,7 @@ export const articleController = new ArticleController(
   getArticleBySlugUseCase,
   updateArticleUseCase,
   deleteArticleUseCase,
-  getArticleBySlugUseCase,
+  // getArticleBySlugUseCase,
 );
 export const cartController = new CartController(
   getCartUseCase,

@@ -1,5 +1,5 @@
 
-import { User } from "../../../domain/entities/user";
+import { User } from "../../../domain/entities/User";
 import { AuthRepository } from "../../../domain/repositories/AuthRepository";
 import { BcryptPasswordService } from "../../../infrastructure/services/BcryptPasswordService";
 import { JwtTokenService } from "../../../infrastructure/services/JwtTokenService";

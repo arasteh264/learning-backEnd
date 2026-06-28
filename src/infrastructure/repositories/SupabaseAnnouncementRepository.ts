@@ -38,29 +38,25 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
     if (error) throw error;
     return result;
   }
-async findAll() {
-  const { data, error } = await supabase
-    .from("announcements")
-    .select("*")
-    .order("is_active", { ascending: false }); 
-
-  if (error) throw error;
-  return data;
-}
-  async delete(id: string) {
+  async findAll() {
     const { data, error } = await supabase
       .from("announcements")
-      .delete()
-      .eq("id", id)
-      .select()
-      .single();
+      .select("*")
+      .order("is_active", { ascending: false });
 
     if (error) throw error;
     return data;
   }
+  async delete(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from("announcements")
+      .delete()
+      .eq("id", id);
+
+    return !error;
+  }
 
   async isActive(id: any) {
-
     const { data, error } = await supabase.rpc("set_active_announcement", {
       announcement_id: Number(id),
     });
