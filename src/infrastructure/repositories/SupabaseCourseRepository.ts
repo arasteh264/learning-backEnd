@@ -42,7 +42,15 @@ export class SupabaseCourseRepository implements CourseRepository {
       .eq("id", id)
       .single();
 
-    if (error) return null;
+    if (error) {
+      console.error(
+        "findById error:",
+        error.message,
+        error.details,
+        error.code,
+      );
+      return null;
+    }
     return data;
   }
 
@@ -80,41 +88,41 @@ export class SupabaseCourseRepository implements CourseRepository {
     if (error) throw error;
     return data;
   }
-  
-async findLatest(limit: number = 8) {
-  const { data, error } = await supabase
-    .from("courses")
-    .select(`
+
+  async findLatest(limit: number = 8) {
+    const { data, error } = await supabase
+      .from("courses")
+      .select(
+        `
       *,
       teachers:creator_id ( id, bio, rating, user_id ),
       categories:category_id ( id, title )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    `,
+      )
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-  if (error) throw error;
-  return data;
-}
+    if (error) throw error;
+    return data;
+  }
 
-
-
-async findPopularFree(limit: number = 8) {
-  const { data, error } = await supabase
-    .from("courses")
-    .select(`
+  async findPopularFree(limit: number = 8) {
+    const { data, error } = await supabase
+      .from("courses")
+      .select(
+        `
       *,
       teachers:creator_id ( id, bio, rating, user_id ),
       categories:category_id ( id, title )
-    `)
-    .eq("price", 0)
-    .order("views", { ascending: false })
-    .order("enrolled_count", { ascending: false })
-    .order("rating", { ascending: false })
-    .limit(limit);
+    `,
+      )
+      .eq("price", 0)
+      .order("views", { ascending: false })
+      .order("enrolled_count", { ascending: false })
+      .order("rating", { ascending: false })
+      .limit(limit);
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data;
+  }
 }
-
-}
-
