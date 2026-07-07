@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger/swagger";
-
+import { errorHandler } from "./middlewares/errorHandler";
 // routes
 import authRouter from "./main/routes/authRoutes";
 import userRouter from "./main/routes/userRoutes";
@@ -22,7 +22,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
 app.get("/api-docs.json", (_req, res) => res.json(swaggerSpec));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -38,4 +37,5 @@ app.use("/v1/article", articleRouter);
 app.use("/v1/cart", cartRoutes);
 app.use("/v1/order", orderRouter);
 app.use("/v1/payment", paymentRouter);
+app.use(errorHandler); 
 export default app;

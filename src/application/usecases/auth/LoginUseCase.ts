@@ -39,12 +39,14 @@ export class LoginUseCase {
       password,
       user.password,
     );
+    console.log("🚀 ~ LoginUseCase ~ execute ~ isValid:", isValid)
 
     if (!isValid) {
       throw new Error("رمز اشتباه است");
     }
 
     const token = this.tokenService.generate(user.id);
+    console.log("🚀 ~ LoginUseCase ~ execute ~ token:", token)
 
     return {
       accessToken: token,

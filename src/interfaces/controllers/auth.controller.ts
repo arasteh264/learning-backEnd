@@ -24,6 +24,7 @@ export class AuthController {
 
   login = asyncHandler(async (req: Request, res: Response) => {
     const { identifier, password } = req.body;
+   
 
     const result = await this.loginUseCase.execute(
       identifier,
