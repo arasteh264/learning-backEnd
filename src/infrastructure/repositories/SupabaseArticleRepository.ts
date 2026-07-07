@@ -14,11 +14,16 @@ export class SupabaseArticleRepository implements ArticleRepository {
   }
 
   async findAll(filters?: { status?: string }) {
-    let q = supabase.from("articles").select(`
+    let q = supabase
+      .from("articles")
+      .select(
+        `
       *,
       categories:category_id ( id, title ),
       teachers:author_id ( id, bio, rating, user_id )
-    `).order("created_at", { ascending: false });
+    `,
+      )
+      .order("created_at", { ascending: false });
 
     if (filters?.status) {
       q = q.eq("status", filters.status);
@@ -32,26 +37,52 @@ export class SupabaseArticleRepository implements ArticleRepository {
   async findById(id: string) {
     const { data, error } = await supabase
       .from("articles")
-      .select(`
+      .select(
+        `
         *,
         categories:category_id ( id, title ),
         teachers:author_id ( id, bio, rating, user_id )
-      `)
+      `,
+      )
       .eq("id", id)
       .single();
 
     if (error) return null;
     return data;
   }
+  async findLatest(limit: number = 8) {
+    
+    const { data, error } = await supabase
+      .from("articles")
+  .select(`
+    *,
+    teachers:author_id (
+      id,
+      bio,
+      rating,
+      user_id
+    ),
+    categories:category_id (
+      id,
+      title
+    )
+  `)
+  .order("created_at", { ascending: false })
+  .limit(limit);
 
+    if (error) throw error;
+    return data;
+  }
   async findBySlug(slug: string) {
     const { data, error } = await supabase
       .from("articles")
-      .select(`
+      .select(
+        `
         *,
         categories:category_id ( id, title ),
         teachers:author_id ( id, bio, rating, user_id )
-      `)
+      `,
+      )
       .eq("slug", slug)
       .eq("status", "published")
       .single();
@@ -61,7 +92,6 @@ export class SupabaseArticleRepository implements ArticleRepository {
   }
 
   async update(id: string, data: any) {
-    console.log(id)
     const { data: result, error } = await supabase
       .from("articles")
       .update({ ...data, updated_at: new Date().toISOString() })

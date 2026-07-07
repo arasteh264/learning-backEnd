@@ -6,4 +6,5 @@ export interface ArticleRepository {
   update(id: string, data: any): Promise<any>;
   delete(id: string): Promise<void>;
   incrementViews(id: string): Promise<void>;
+  findLatest(limit?: number): Promise<any[]>;
 }

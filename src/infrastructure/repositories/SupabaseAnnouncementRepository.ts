@@ -61,7 +61,6 @@ export class SupabaseAnnouncementRepository implements AnnouncementRepository {
       announcement_id: Number(id),
     });
 
-    console.log("rpc result:", data, "error:", error);
 
     if (error) throw error;
     return data;

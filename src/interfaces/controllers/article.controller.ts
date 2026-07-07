@@ -9,6 +9,7 @@ import { deleteFile } from "../../config/storageSupabase";
 import { ApiResponse } from "../../shared/http/api-response";
 import { asyncHandler } from "../../shared/asyncHandler";
 import { ArticleMessages } from "../../shared/messages/article.messages";
+import { GetLatestArticlesUseCase } from "../../application/usecases/article/GetLatestArticles";
 
 type MulterRequest = Request & {
   file?: Express.Multer.File;
@@ -21,6 +22,7 @@ export class ArticleController {
     private getArticleBySlugUseCase: GetArticleBySlugUseCase,
     private updateArticleUseCase: UpdateArticleUseCase,
     private deleteArticleUseCase: DeleteArticleUseCase,
+    private getLatestArticlesUseCase: GetLatestArticlesUseCase
   ) {}
 
   createArticle = asyncHandler(async (req: MulterRequest, res: Response) => {
@@ -36,11 +38,18 @@ export class ArticleController {
       cover,
     });
 
-    return ApiResponse.created(
-      res,
-      result,
-      ArticleMessages.CREATED,
-    );
+    return ApiResponse.created(res, result, ArticleMessages.CREATED);
+  });
+
+  getLatestArticles = asyncHandler(async (req: Request, res: Response) => {
+    const limit = req.query.limit ? Number(req.query.limit) : 8;
+    console.log("🚀 ~ ArticleController ~ limit:", limit)
+ 
+
+    const Articles = await this.getLatestArticlesUseCase.execute(limit);
+    console.log("🚀 ~ ArticleController ~ Articles:", Articles)
+
+    return ApiResponse.success(res, Articles, ArticleMessages.FETCHED);
   });
 
   getAllArticles = asyncHandler(async (req: Request, res: Response) => {
@@ -69,22 +78,17 @@ export class ArticleController {
       newCoverUrl = url;
     }
 
-    const { result, oldCover } =
-      await this.updateArticleUseCase.execute(
-        id,
-        req.body,
-        newCoverUrl,
-      );
+    const { result, oldCover } = await this.updateArticleUseCase.execute(
+      id,
+      req.body,
+      newCoverUrl,
+    );
 
     if (newCoverUrl && oldCover) {
       await deleteFile(oldCover, "articles");
     }
 
-    return ApiResponse.success(
-      res,
-      result,
-      ArticleMessages.UPDATED,
-    );
+    return ApiResponse.success(res, result, ArticleMessages.UPDATED);
   });
 
   deleteArticle = asyncHandler(async (req: Request, res: Response) => {
@@ -92,9 +96,6 @@ export class ArticleController {
 
     await this.deleteArticleUseCase.execute(id);
 
-    return ApiResponse.deleted(
-      res,
-      ArticleMessages.DELETED,
-    );
+    return ApiResponse.deleted(res, ArticleMessages.DELETED);
   });
 }
