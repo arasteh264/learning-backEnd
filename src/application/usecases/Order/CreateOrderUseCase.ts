@@ -30,7 +30,6 @@ export class CreateOrderUseCase {
     const totalprice = items.reduce((sum: number, item: Item) => {
       return sum + item.price;
     }, 0);
-    console.log("Total price:", totalprice);
 
     const order = await this.orderRepo.createOrder(userId, items, totalprice);
 

@@ -14,19 +14,20 @@ router.get(
   "/",
   courseController.getAllCourses
 );
+router.get("/latest", courseController.getLatestCourses);
+router.get("/search", courseController.searchCourse);
+router.get("/free/popular", courseController.getPopularFreeCourses);
 
 router.get(
   "/:id",
   courseController.getCourse
 );
-router.get("/latest", courseController.getLatestCourses);
-router.get("/search", courseController.searchCourse);
+
 router.put(
   "/:id",
   courseController.updateCourse
 );
 
-router.get("/free/popular", courseController.getPopularFreeCourses);
 router.delete(
   "/:id",
   courseController.deleteCourse

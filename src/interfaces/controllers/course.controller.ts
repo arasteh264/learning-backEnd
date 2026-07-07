@@ -100,6 +100,7 @@ export class CourseController {
 
   searchCourse = asyncHandler(async (req: Request, res: Response) => {
     const query = (req.query.q as string) || "";
+    console.log("🚀 ~ CourseController ~ query:", query)
 
     const courses = await this.searchCourseUseCase.execute(query);
 

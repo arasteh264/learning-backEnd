@@ -7,7 +7,6 @@ export class IsActiveAnnouncementUseCase {
   ) {}
 
   async execute(id: string) {
-    console.log(id);
     
     return await this.announcementRepository.isActive(id);
   }

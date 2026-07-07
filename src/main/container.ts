@@ -95,6 +95,7 @@ import { GetAllTransactionsUseCase } from "../application/usecases/payment/GetAl
 import { GetCourseUseCase } from "../application/usecases/course/Getcourse";
 import { GetSessionsByCourseUseCase } from "../application/usecases/session/Getsessionsbycourse";
 import { GetSessionByIdUseCase } from "../application/usecases/session/Getsessionbyid";
+import { GetLatestArticlesUseCase } from "../application/usecases/article/GetLatestArticles";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -195,6 +196,7 @@ const getAllArticlesUseCase = new GetAllArticlesUseCase(articleRepo);
 const getArticleBySlugUseCase = new GetArticleBySlugUseCase(articleRepo);
 const updateArticleUseCase = new UpdateArticleUseCase(articleRepo);
 const deleteArticleUseCase = new DeleteArticleUseCase(articleRepo);
+const getLatestArticleUseCase = new GetLatestArticlesUseCase(articleRepo);
 
 const createCourseUseCase = new CreateCourseUseCase(courseRepo);
 const updateCourseUseCase = new UpdateCourseUseCase(courseRepo);
@@ -294,6 +296,7 @@ export const articleController = new ArticleController(
   updateArticleUseCase,
   deleteArticleUseCase,
   // getArticleBySlugUseCase,
+  getLatestArticleUseCase,
 );
 export const cartController = new CartController(
   getCartUseCase,
