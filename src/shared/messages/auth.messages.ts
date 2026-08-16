@@ -12,4 +12,8 @@ export const AuthMessages = {
   INVALID_TOKEN: "توکن نامعتبر است",
 
   PASSWORD_WEAK: "رمز عبور ضعیف است",
+  
+  OTP_SENT: "کد تایید ارسال شد",
+  OTP_VERIFIED: "کد تایید تایید شد",
+  PASSWORD_RESET: "رمز عبور با موفقیت تغییر کرد",
 } as const;

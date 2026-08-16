@@ -96,6 +96,12 @@ import { GetCourseUseCase } from "../application/usecases/course/Getcourse";
 import { GetSessionsByCourseUseCase } from "../application/usecases/session/Getsessionsbycourse";
 import { GetSessionByIdUseCase } from "../application/usecases/session/Getsessionbyid";
 import { GetLatestArticlesUseCase } from "../application/usecases/article/GetLatestArticles";
+import { SupabaseOtpRepository } from "../infrastructure/repositories/SupabaseOtpRepository";
+import { SmsNotificationProvider } from "../infrastructure/services/SmsNotificationProvider";
+import { EmailNotificationProvider } from "../infrastructure/services/EmailNotificationProvider";
+import { SendOtpUseCase } from "../application/usecases/auth/SendOtpUseCase";
+import { VerifyOtpUseCase } from "../application/usecases/auth/VerifyOtpUseCase";
+import { ResetPasswordUseCase } from "../application/usecases/auth/ResetPasswordUseCase";
 
 // repositories
 const courseRepo = new SupabaseCourseRepository();
@@ -112,6 +118,9 @@ const orderRepo = new SupabaseOrderRepository();
 const transactionRepo = new SupabaseTransactionRepository();
 const enrollmentRepo = new SupabaseEnrollmentRepository();
 const paymentGateway = new ZarinpalGateway();
+const otpRepository = new SupabaseOtpRepository();
+const smsProvider = new SmsNotificationProvider();
+const emailProvider = new EmailNotificationProvider();
 
 // services
 const storage = new SupabaseStorageService();
@@ -170,6 +179,11 @@ const getActiveAnnouncementUseCase = new GetActiveAnnouncementUseCase(
 const getAnnouncementByIdUseCase = new GetAnnouncementByIdUseCase(
   announcementRepo,
 );
+
+
+export const sendOtpUseCase = new SendOtpUseCase(otpRepository, smsProvider, emailProvider);
+export const verifyOtpUseCase = new VerifyOtpUseCase(otpRepository);
+export const resetPasswordUseCase = new ResetPasswordUseCase(verifyOtpUseCase, userRepo);
 
 const createSliderUseCase = new CreateSliderUseCase(sliderRepo);
 const getAllSlidersUseCase = new GetAllSlidersUseCase(sliderRepo);
@@ -253,7 +267,13 @@ export const sessionController = new SessionController(
   deleteSessionUseCase,
 );
 
-export const authController = new AuthController(registerUseCase, loginUseCase);
+export const authController = new AuthController(
+  registerUseCase,
+  loginUseCase,
+  sendOtpUseCase,
+  verifyOtpUseCase,
+  resetPasswordUseCase,
+);
 
 export const userController = new UserController(
   banUserUseCase,
@@ -312,3 +332,4 @@ export const paymentController = new PaymentController(
   verifyPaymentUseCase,
   getAllTransactionsUseCase,
 );
+

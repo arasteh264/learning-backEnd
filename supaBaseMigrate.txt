@@ -1,6 +1,6 @@
 //for create table
-supabase migration new create_yourTable
+npx supabase migration new create_yourTable
 
 
 //push all migrat
-supabase db push
+npx supabase db push

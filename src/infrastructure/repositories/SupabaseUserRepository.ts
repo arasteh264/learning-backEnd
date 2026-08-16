@@ -53,4 +53,12 @@ export class SupabaseUserRepository implements UserRepository {
     await supabase.from("banned_users").insert([{ user_id: userId }]);
     return true;
   }
+
+
+  async updatePasswordByIdentifier(identifier: string, passwordHash: string): Promise<void> {
+  await supabase
+    .from("users")
+    .update({ password_hash: passwordHash })
+    .or(`email.eq.${identifier},phone.eq.${identifier}`);
+}
 }
