@@ -1,8 +1,12 @@
+import nodemailer from "nodemailer";
+import { INotificationProvider } from "../../domain/services/INotificationProvider";
+
 const LOGO_BASE64 =
   "PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjExMiIgaGVpZ2h0PSIxMTIiIHJ4PSIyOCIgZmlsbD0iI0ZGRkZGRiI+PC9yZWN0PjxwYXRoIGQ9Ik00MiAzNCBMNDIgODQgTDYwIDcwIEw3OCA4NCBMNzggMzQgWiIgZmlsbD0iIzMxMkU4MSI+PC9wYXRoPjxjaXJjbGUgY3g9IjgyIiBjeT0iMzgiIHI9IjciIGZpbGw9IiNGQkJGMjQiPjwvY2lyY2xlPjwvc3ZnPg==";
 
-export function otpEmailTemplate(code: string, purpose: string): string {
-  const title = purpose === "reset_password" ? "بازیابی رمز عبور" : "کد ورود به حساب کاربری";
+function otpEmailTemplate(code: string, purpose: string): string {
+  const title =
+    purpose === "reset_password" ? "بازیابی رمز عبور" : "کد ورود به حساب کاربری";
 
   return `
   <!DOCTYPE html>
@@ -12,14 +16,12 @@ export function otpEmailTemplate(code: string, purpose: string): string {
       <tr>
         <td align="center">
           <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.06);">
-
             <tr>
               <td style="background:#0f172a; padding:24px; text-align:center;">
                 <img src="data:image/svg+xml;base64,${LOGO_BASE64}" width="40" height="40" alt="Sabzlearn" style="display:inline-block; vertical-align:middle;" />
                 <span style="color:#ffffff; font-size:18px; font-weight:bold; vertical-align:middle; margin-right:8px; font-family: Tahoma, Arial, sans-serif;">Sabzlearn</span>
               </td>
             </tr>
-
             <tr>
               <td style="padding:32px 32px 8px; text-align:center;">
                 <h2 style="margin:0 0 8px; color:#111827; font-size:20px;">${title}</h2>
@@ -28,7 +30,6 @@ export function otpEmailTemplate(code: string, purpose: string): string {
                 </p>
               </td>
             </tr>
-
             <tr>
               <td style="padding:24px 32px;">
                 <div style="background:#f0fdf4; border:1px dashed #22c55e; border-radius:12px; padding:20px; text-align:center;">
@@ -36,7 +37,6 @@ export function otpEmailTemplate(code: string, purpose: string): string {
                 </div>
               </td>
             </tr>
-
             <tr>
               <td style="padding:0 32px 32px; text-align:center;">
                 <p style="margin:0; color:#9ca3af; font-size:12px; line-height:20px;">
@@ -44,13 +44,11 @@ export function otpEmailTemplate(code: string, purpose: string): string {
                 </p>
               </td>
             </tr>
-
             <tr>
               <td style="background:#f9fafb; padding:16px; text-align:center; border-top:1px solid #f0f0f0;">
                 <p style="margin:0; color:#9ca3af; font-size:12px;">© Sabzlearn — یاد بگیر، یادداشت کن</p>
               </td>
             </tr>
-
           </table>
         </td>
       </tr>
@@ -58,4 +56,21 @@ export function otpEmailTemplate(code: string, purpose: string): string {
   </body>
   </html>
   `;
+}
+
+export class EmailNotificationProvider implements INotificationProvider {
+  private transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+
+  async send(identifier: string, code: string, purpose: string): Promise<void> {
+    await this.transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: identifier,
+      subject: purpose === "reset_password" ? "بازیابی رمز عبور" : "کد ورود",
+      html: otpEmailTemplate(code, purpose),
+    });
+  }
 }
